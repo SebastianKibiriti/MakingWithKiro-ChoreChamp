@@ -2,7 +2,6 @@
 
 - [x] 1. Set up project dependencies and environment configuration
 
-
   - Install required packages: @google/generative-ai, assemblyai, axios for API calls
   - Add environment variables for Google Gemini, AssemblyAI, and ElevenLabs API keys
   - Create environment variable validation utility
