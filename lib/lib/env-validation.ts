@@ -5,12 +5,12 @@
 
 interface VoiceCoachEnvConfig {
   googleGeminiApiKey: string;
-  assemblyAiApiKey: string;
+  assemblyAIApiKey: string;
   elevenLabsApiKey: string;
   geminiModel: string;
   geminiTemperature: number;
   geminiMaxTokens: number;
-  assemblyAiSampleRate: number;
+  assemblyAISampleRate: number;
   elevenLabsModel: string;
   defaultCharacter: string;
   maxSessionMinutes: number;
@@ -32,14 +32,14 @@ export function validateVoiceCoachEnvironment(): ValidationResult {
   
   // Required API keys
   const googleGeminiApiKey = process.env.GOOGLE_GEMINI_API_KEY;
-  const assemblyAiApiKey = process.env.ASSEMBLYAI_API_KEY;
+  const assemblyAIApiKey = process.env.ASSEMBLYAI_API_KEY;
   const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
   
   if (!googleGeminiApiKey) {
     errors.push('GOOGLE_GEMINI_API_KEY is required');
   }
   
-  if (!assemblyAiApiKey) {
+  if (!assemblyAIApiKey) {
     errors.push('ASSEMBLYAI_API_KEY is required');
   }
   
@@ -51,7 +51,7 @@ export function validateVoiceCoachEnvironment(): ValidationResult {
   const geminiModel = process.env.GEMINI_MODEL || 'gemini-pro';
   const geminiTemperature = parseFloat(process.env.GEMINI_TEMPERATURE || '0.7');
   const geminiMaxTokens = parseInt(process.env.GEMINI_MAX_TOKENS || '150');
-  const assemblyAiSampleRate = parseInt(process.env.ASSEMBLYAI_SAMPLE_RATE || '16000');
+  const assemblyAISampleRate = parseInt(process.env.ASSEMBLYAI_SAMPLE_RATE || '16000');
   const elevenLabsModel = process.env.ELEVENLABS_MODEL || 'eleven_monolingual_v1';
   const defaultCharacter = process.env.VOICE_COACH_DEFAULT_CHARACTER || 'friendly-guide';
   const maxSessionMinutes = parseInt(process.env.VOICE_COACH_MAX_SESSION_MINUTES || '10');
@@ -66,7 +66,7 @@ export function validateVoiceCoachEnvironment(): ValidationResult {
     errors.push('GEMINI_MAX_TOKENS must be a positive number');
   }
   
-  if (isNaN(assemblyAiSampleRate) || assemblyAiSampleRate < 8000) {
+  if (isNaN(assemblyAISampleRate) || assemblyAISampleRate < 8000) {
     errors.push('ASSEMBLYAI_SAMPLE_RATE must be at least 8000');
   }
   
@@ -90,12 +90,12 @@ export function validateVoiceCoachEnvironment(): ValidationResult {
     errors: [],
     config: {
       googleGeminiApiKey: googleGeminiApiKey!,
-      assemblyAiApiKey: assemblyAiApiKey!,
+      assemblyAIApiKey: assemblyAIApiKey!,
       elevenLabsApiKey: elevenLabsApiKey!,
       geminiModel,
       geminiTemperature,
       geminiMaxTokens,
-      assemblyAiSampleRate,
+      assemblyAISampleRate,
       elevenLabsModel,
       defaultCharacter,
       maxSessionMinutes,

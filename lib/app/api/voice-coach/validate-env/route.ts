@@ -18,14 +18,14 @@ export async function GET() {
           geminiModel: validation.config?.geminiModel,
           geminiTemperature: validation.config?.geminiTemperature,
           geminiMaxTokens: validation.config?.geminiMaxTokens,
-          assemblyAiSampleRate: validation.config?.assemblyAiSampleRate,
+          assemblyAiSampleRate: validation.config?.assemblyAISampleRate,
           elevenLabsModel: validation.config?.elevenLabsModel,
           defaultCharacter: validation.config?.defaultCharacter,
           maxSessionMinutes: validation.config?.maxSessionMinutes,
           dailyLimitMinutes: validation.config?.dailyLimitMinutes,
           // Don't return API keys for security
           hasGeminiKey: !!validation.config?.googleGeminiApiKey,
-          hasAssemblyAiKey: !!validation.config?.assemblyAiApiKey,
+          hasAssemblyAiKey: !!validation.config?.assemblyAIApiKey,
           hasElevenLabsKey: !!validation.config?.elevenLabsApiKey
         }
       });
