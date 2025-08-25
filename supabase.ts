@@ -7,19 +7,27 @@ let supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.S
 // Clean and validate URL
 function cleanSupabaseUrl(url: string): string {
   if (!url || url.includes('your_supabase_project_url') || url.includes('placeholder')) {
+    console.warn('Invalid Supabase URL, using placeholder')
     return 'https://placeholder.supabase.co'
   }
   
   // Remove trailing slash
   const cleaned = url.endsWith('/') ? url.slice(0, -1) : url
   
-  // Validate URL format
+  // Validate URL format - be more lenient for supabase.co domains
   try {
-    new URL(cleaned)
+    const urlObj = new URL(cleaned)
+    if (urlObj.hostname.endsWith('.supabase.co')) {
+      return cleaned
+    }
     return cleaned
   } catch {
-    console.warn('Invalid Supabase URL, using placeholder')
-    return 'https://placeholder.supabase.co'
+    // Only warn if it's not a valid supabase URL pattern
+    if (!cleaned.includes('.supabase.co')) {
+      console.warn('Invalid Supabase URL, using placeholder')
+      return 'https://placeholder.supabase.co'
+    }
+    return cleaned
   }
 }
 
