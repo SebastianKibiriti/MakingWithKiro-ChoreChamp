@@ -1,12 +1,10 @@
-headersOrigin = "inline"
-redirectsOrigin = "inline"
-
-[images]
-remote_images = ["^(?:http(?:s)?:\\/\\/localhost(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$"]
+headers = []
+redirects = []
 
 [functions]
 
 [functions."*"]
+node_bundler = "esbuild"
 
 [[plugins]]
 origin = "config"
@@ -15,7 +13,7 @@ package = "@netlify/plugin-nextjs"
 [plugins.inputs]
 
 [build]
-publish = "C:\\Users\\Clint\\Documents\\KiroCC\\out"
+publish = "C:\\Users\\Clint\\Documents\\KiroCC\\.next"
 publishOrigin = "config"
 commandOrigin = "config"
 command = "npm run build"
@@ -34,39 +32,3 @@ NODE_VERSION = "18"
 [build.processing.js]
 
 [build.services]
-
-[[headers]]
-for = "/_next/static/*"
-
-[headers.values]
-Cache-Control = "public, max-age=31536000, immutable"
-
-[[redirects]]
-from = "/_next/image/"
-to = "/.netlify/images?url=:url&w=:width&q=:quality"
-status = 200.0
-force = false
-
-[redirects.query]
-url = ":url"
-w = ":width"
-q = ":quality"
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
-from = "/_ipx/*"
-to = "/.netlify/images?url=:url&w=:width&q=:quality"
-status = 200.0
-force = false
-
-[redirects.query]
-url = ":url"
-w = ":width"
-q = ":quality"
-
-[redirects.conditions]
-
-[redirects.headers]

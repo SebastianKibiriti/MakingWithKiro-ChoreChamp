@@ -1,9 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'placeholder-key'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Only validate in production or when not building
+const isBuilding = process.env.NODE_ENV === 'production' && process.env.NETLIFY
+if (!isBuilding && (supabaseUrl.includes('placeholder') || supabaseAnonKey.includes('placeholder'))) {
+  console.warn('Using placeholder Supabase credentials. Set proper environment variables for production.')
+}
+
+// Ensure URL is properly formatted and valid
+let cleanUrl = supabaseUrl
+if (supabaseUrl.includes('your_supabase_project_url') || supabaseUrl.includes('placeholder')) {
+  cleanUrl = 'https://placeholder.supabase.co'
+} else {
+  cleanUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl
+}
+
+export const supabase = createClient(cleanUrl, supabaseAnonKey)
 
 export type Database = {
   public: {
