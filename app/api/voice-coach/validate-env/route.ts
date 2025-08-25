@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { validateVoiceCoachEnvironment } from '@/lib/lib/env-validation';
+import { validateVoiceCoachEnvironment } from '@/lib/env-validation';
 
 /**
  * API route to validate Voice Coach environment configuration

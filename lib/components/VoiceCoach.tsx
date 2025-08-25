@@ -8,11 +8,11 @@ import {
   ExclamationTriangleIcon,
   Cog6ToothIcon
 } from '@heroicons/react/24/outline'
-import { AssemblyAIService, TranscriptionResult } from '../lib/services/assemblyai'
-import { GeminiService, VoiceCharacter, VOICE_CHARACTERS } from '../lib/services/gemini'
-import { ElevenLabsService, AudioResult } from '../lib/services/elevenlabs'
-import { ConversationManager, getConversationManager } from '../lib/conversation-manager'
-import { getVoiceCoachConfig } from '../lib/env-validation'
+import { AssemblyAIService, TranscriptionResult } from '../services/assemblyai'
+import { GeminiService, VoiceCharacter, VOICE_CHARACTERS } from '../services/gemini'
+import { ElevenLabsService, AudioResult } from '../services/elevenlabs'
+import { ConversationManager, getConversationManager } from '../conversation-manager'
+import { getVoiceCoachConfig } from '../env-validation'
 
 // Voice Coach States
 type VoiceCoachState = 'idle' | 'listening' | 'processing' | 'speaking' | 'error'

@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../auth-context'
 import { Database } from '../supabase'
 import Navigation from './Navigation'
 import Header from './Header'

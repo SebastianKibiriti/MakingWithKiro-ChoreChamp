@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import VoiceCoach from './VoiceCoach'
-import { VOICE_CHARACTERS } from '../lib/services/gemini'
+import { VOICE_CHARACTERS } from '../services/gemini'
 
 /**
  * Demo component to showcase the VoiceCoach functionality

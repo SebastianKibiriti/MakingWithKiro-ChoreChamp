@@ -4,7 +4,7 @@ import '@testing-library/jest-dom'
 import VoiceCoach from '../VoiceCoach'
 
 // Mock the services
-jest.mock('../../lib/services/assemblyai', () => ({
+jest.mock('../../services/assemblyai', () => ({
   AssemblyAIService: jest.fn().mockImplementation(() => ({
     requestMicrophonePermission: jest.fn().mockResolvedValue(true),
     startRealTimeTranscription: jest.fn().mockResolvedValue(undefined),
@@ -15,7 +15,7 @@ jest.mock('../../lib/services/assemblyai', () => ({
   }))
 }))
 
-jest.mock('../../lib/services/gemini', () => ({
+jest.mock('../../services/gemini', () => ({
   GeminiService: jest.fn().mockImplementation(() => ({
     generateResponse: jest.fn().mockResolvedValue({
       text: 'Great job! Keep up the good work!',
@@ -35,7 +35,7 @@ jest.mock('../../lib/services/gemini', () => ({
   }
 }))
 
-jest.mock('../../lib/services/elevenlabs', () => ({
+jest.mock('../../services/elevenlabs', () => ({
   ElevenLabsService: jest.fn().mockImplementation(() => ({
     synthesizeSpeech: jest.fn().mockResolvedValue({
       audioData: new ArrayBuffer(1024),
@@ -49,7 +49,7 @@ jest.mock('../../lib/services/elevenlabs', () => ({
   }))
 }))
 
-jest.mock('../../lib/conversation-manager', () => ({
+jest.mock('../../conversation-manager', () => ({
   getConversationManager: jest.fn().mockReturnValue({
     startSession: jest.fn().mockResolvedValue({
       id: 'test-session-id',
@@ -74,7 +74,7 @@ jest.mock('../../lib/conversation-manager', () => ({
   })
 }))
 
-jest.mock('../../lib/env-validation', () => ({
+jest.mock('../../env-validation', () => ({
   getVoiceCoachConfig: jest.fn().mockReturnValue({
     googleGeminiApiKey: 'test-gemini-key',
     assemblyAIApiKey: 'test-assembly-key',
@@ -174,7 +174,7 @@ describe('VoiceCoach Component', () => {
 
   it('displays error state correctly', async () => {
     // Mock permission denied
-    const mockAssemblyAI = require('../../lib/services/assemblyai').AssemblyAIService
+    const mockAssemblyAI = require('../../services/assemblyai').AssemblyAIService
     mockAssemblyAI.mockImplementation(() => ({
       requestMicrophonePermission: jest.fn().mockResolvedValue(false),
       dispose: jest.fn()
