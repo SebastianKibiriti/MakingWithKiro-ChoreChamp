@@ -1,23 +1,32 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'placeholder-key'
+// Get environment variables with fallbacks
+let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://placeholder.supabase.co'
+let supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'placeholder-key'
 
-// Only validate in production or when not building
-const isBuilding = process.env.NODE_ENV === 'production' && process.env.NETLIFY
-if (!isBuilding && (supabaseUrl.includes('placeholder') || supabaseAnonKey.includes('placeholder'))) {
-  console.warn('Using placeholder Supabase credentials. Set proper environment variables for production.')
+// Clean and validate URL
+function cleanSupabaseUrl(url: string): string {
+  if (!url || url.includes('your_supabase_project_url') || url.includes('placeholder')) {
+    return 'https://placeholder.supabase.co'
+  }
+  
+  // Remove trailing slash
+  const cleaned = url.endsWith('/') ? url.slice(0, -1) : url
+  
+  // Validate URL format
+  try {
+    new URL(cleaned)
+    return cleaned
+  } catch {
+    console.warn('Invalid Supabase URL, using placeholder')
+    return 'https://placeholder.supabase.co'
+  }
 }
 
-// Ensure URL is properly formatted and valid
-let cleanUrl = supabaseUrl
-if (supabaseUrl.includes('your_supabase_project_url') || supabaseUrl.includes('placeholder')) {
-  cleanUrl = 'https://placeholder.supabase.co'
-} else {
-  cleanUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl
-}
+const cleanUrl = cleanSupabaseUrl(supabaseUrl)
+const cleanKey = supabaseAnonKey.includes('your_supabase_anon_key') ? 'placeholder-key' : supabaseAnonKey
 
-export const supabase = createClient(cleanUrl, supabaseAnonKey)
+export const supabase = createClient(cleanUrl, cleanKey)
 
 export type Database = {
   public: {
