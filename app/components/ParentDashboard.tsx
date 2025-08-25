@@ -172,7 +172,7 @@ export default function ParentDashboard({ profile }: ParentDashboardProps) {
       await fetchData()
     } catch (error) {
       console.error('Error approving completion:', error)
-      alert(`Error approving chore: ${error.message}`)
+      alert(`Error approving chore: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

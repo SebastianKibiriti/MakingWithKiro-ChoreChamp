@@ -23,8 +23,12 @@ const CHARACTER_PROMPTS = {
 }
 
 export async function POST(request: NextRequest) {
+  let character = 'superhero' // Default character
+  
   try {
-    const { character, childName, currentPoints, currentRank, recentActivity } = await request.json()
+    const requestData = await request.json()
+    character = requestData.character || 'superhero'
+    const { childName, currentPoints, currentRank, recentActivity } = requestData
 
     const characterConfig = CHARACTER_PROMPTS[character as keyof typeof CHARACTER_PROMPTS] || CHARACTER_PROMPTS.superhero
 

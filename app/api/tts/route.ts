@@ -37,4 +37,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('TTS API Error:', er
+    console.error('TTS API Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to generate speech' },
+      { status: 500 }
+    )
+  }
+}

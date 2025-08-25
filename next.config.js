@@ -2,10 +2,8 @@
 const nextConfig = {
   images: {
     domains: ['localhost'],
-    unoptimized: true, // Required for static export
   },
-  output: 'export', // Enable static export
-  trailingSlash: true, // Recommended for static hosting
+  // Removed static export for Netlify Functions support
 }
 
 module.exports = nextConfig

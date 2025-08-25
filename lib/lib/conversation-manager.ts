@@ -347,11 +347,20 @@ export class ConversationManager {
       // Update daily usage tracking
       const today = new Date().toISOString().split('T')[0];
       
+      // First get current usage, then update
+      const { data: currentSettings } = await supabase
+        .from('voice_coach_settings')
+        .select('usage_today')
+        .eq('user_id', userId)
+        .single();
+
+      const currentUsage = currentSettings?.usage_today || 0;
+      
       const { error } = await supabase
         .from('voice_coach_settings')
         .upsert({
           user_id: userId,
-          usage_today: supabase.raw('usage_today + ?', [interaction.duration]),
+          usage_today: currentUsage + interaction.duration,
           last_reset_date: today
         }, {
           onConflict: 'user_id'
