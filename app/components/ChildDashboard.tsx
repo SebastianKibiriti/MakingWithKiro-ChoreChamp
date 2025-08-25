@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Trophy, Star, CheckCircle, Clock } from 'lucide-react'
 import { getRankByPoints, getNextRank, ARMY_RANKS } from '@/lib/ranks'
-import AIVoiceCoach from './AIVoiceCoach'
+// import AIVoiceCoach from './AIVoiceCoach' // Temporarily disabled
 
 interface ChildDashboardProps {
   profile: any
@@ -135,7 +135,7 @@ export default function ChildDashboard({ profile: initialProfile, onProfileUpdat
   const currentRank = getRankByPoints(currentProfile.points)
   const nextRank = getNextRank(currentProfile.points)
   const progressToNext = nextRank 
-    ? ((currentProfile.points - currentRank.pointsRequired) / (nextRank.pointsRequired - currentRank.pointsRequired)) * 100
+    ? ((currentProfile.points - currentRank.points) / (nextRank.points - currentRank.points)) * 100
     : 100
 
   return (
@@ -148,7 +148,7 @@ export default function ChildDashboard({ profile: initialProfile, onProfileUpdat
           Welcome to your Mission Hub, {currentProfile.name}!
         </h1>
         <div className="flex justify-center items-center space-x-4 mb-4">
-          <span className={`rank-badge ${currentRank.color} text-white text-lg`}>
+          <span className="rank-badge bg-indigo-600 text-white text-lg">
             {currentRank.icon} {currentRank.name}
           </span>
           <span className="text-xl font-semibold text-army-600">
@@ -174,7 +174,7 @@ export default function ChildDashboard({ profile: initialProfile, onProfileUpdat
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Progress to {nextRank.name}</span>
               <span className="text-sm text-gray-600">
-                {currentProfile.points} / {nextRank.pointsRequired} points
+                {currentProfile.points} / {nextRank.points} points
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
@@ -184,7 +184,7 @@ export default function ChildDashboard({ profile: initialProfile, onProfileUpdat
               ></div>
             </div>
             <p className="text-sm text-gray-600 mt-2">
-              {nextRank.pointsRequired - currentProfile.points} points to go!
+              {nextRank.points - currentProfile.points} points to go!
             </p>
           </div>
         ) : (
@@ -196,8 +196,8 @@ export default function ChildDashboard({ profile: initialProfile, onProfileUpdat
         )}
       </div>
 
-      {/* AI Voice Coach */}
-      <AIVoiceCoach profile={currentProfile} />
+      {/* AI Voice Coach - Temporarily disabled */}
+      {/* <AIVoiceCoach profile={currentProfile} /> */}
 
       {/* Available Missions */}
       <div className="card">

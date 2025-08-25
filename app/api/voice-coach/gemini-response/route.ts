@@ -57,6 +57,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const config = getVoiceCoachConfig()
+    
+    // Check if Google Gemini API key is configured
+    if (!config.googleGeminiApiKey) {
+      return NextResponse.json(
+        { error: 'Google Gemini API key not configured' },
+        { status: 500 }
+      )
+    }
+    
     const body: GeminiRequestBody = await request.json()
     
     // Validate required fields
@@ -70,15 +79,15 @@ export async function POST(request: NextRequest) {
     // Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(config.googleGeminiApiKey)
     const model = genAI.getGenerativeModel({ 
-      model: config.geminiModel,
+      model: config.geminiModel || 'gemini-pro',
       generationConfig: {
-        temperature: config.geminiTemperature,
-        maxOutputTokens: config.geminiMaxTokens,
+        temperature: config.geminiTemperature || 0.7,
+        maxOutputTokens: config.geminiMaxTokens || 150,
       }
     })
     
     // Build system prompt based on character
-    const systemPrompt = buildSystemPrompt(body.character || config.defaultCharacter)
+    const systemPrompt = buildSystemPrompt(body.character || config.defaultCharacter || 'friendly-guide')
     
     // Build context prompt
     const contextPrompt = buildContextPrompt(body.context)

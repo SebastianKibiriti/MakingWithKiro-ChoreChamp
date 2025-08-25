@@ -107,7 +107,7 @@ export default function CreateRewardModal({ parentId, onClose, onSuccess }: Crea
             >
               <option value="">No rank requirement</option>
               {ARMY_RANKS.map((rank) => (
-                <option key={rank.id} value={rank.id}>
+                <option key={rank.name} value={rank.name}>
                   {rank.icon} {rank.name}
                 </option>
               ))}

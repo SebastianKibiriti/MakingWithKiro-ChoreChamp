@@ -16,6 +16,14 @@ export async function POST(request: NextRequest) {
   try {
     const config = getVoiceCoachConfig()
     
+    // Check if AssemblyAI API key is configured
+    if (!config.assemblyAIApiKey) {
+      return NextResponse.json(
+        { error: 'AssemblyAI API key not configured' },
+        { status: 500 }
+      )
+    }
+    
     // Generate a temporary token for AssemblyAI real-time service
     const response = await fetch('https://api.assemblyai.com/v2/realtime/token', {
       method: 'POST',

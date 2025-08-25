@@ -55,6 +55,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const config = getVoiceCoachConfig()
+    
+    // Check if ElevenLabs API key is configured
+    if (!config.elevenLabsApiKey) {
+      return NextResponse.json(
+        { error: 'ElevenLabs API key not configured' },
+        { status: 500 }
+      )
+    }
+    
     const body: ElevenLabsRequestBody = await request.json()
     
     // Validate required fields
@@ -74,7 +83,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Get voice character configuration
-    const character = body.character || config.defaultCharacter
+    const character = body.character || config.defaultCharacter || 'friendly-guide'
     const voiceConfig = VOICE_CHARACTERS[character] || VOICE_CHARACTERS['friendly-guide']
     
     // Prepare voice settings
@@ -93,7 +102,7 @@ export async function POST(request: NextRequest) {
         headers: {
           'Accept': 'audio/mpeg',
           'Content-Type': 'application/json',
-          'xi-api-key': config.elevenLabsApiKey,
+          'xi-api-key': config.elevenLabsApiKey || '',
         },
         body: JSON.stringify({
           text: body.text,

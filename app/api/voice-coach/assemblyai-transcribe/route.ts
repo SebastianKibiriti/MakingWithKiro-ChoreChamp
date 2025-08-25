@@ -37,6 +37,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const config = getVoiceCoachConfig()
+    
+    // Check if AssemblyAI API key is configured
+    if (!config.assemblyAIApiKey) {
+      return NextResponse.json(
+        { error: 'AssemblyAI API key not configured' },
+        { status: 500 }
+      )
+    }
+    
     const body: TranscriptionRequestBody = await request.json()
     
     // Validate input

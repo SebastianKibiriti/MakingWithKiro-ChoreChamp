@@ -142,7 +142,7 @@ export default function ParentDashboard({ profile }: ParentDashboardProps) {
           .from('profiles')
           .update({
             points: newPoints,
-            rank: newRank.id,
+            rank: newRank.name,
             updated_at: new Date().toISOString()
           })
           .eq('id', childId)
@@ -276,7 +276,7 @@ export default function ParentDashboard({ profile }: ParentDashboardProps) {
                 <div key={child.id} className="border rounded-lg p-4">
                   <h3 className="font-semibold text-lg">{child.name}</h3>
                   <div className="mt-2">
-                    <span className={`rank-badge ${rank.color} text-white`}>
+                    <span className="rank-badge bg-indigo-600 text-white">
                       {rank.icon} {rank.name}
                     </span>
                   </div>

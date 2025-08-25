@@ -13,12 +13,20 @@ function cleanSupabaseUrl(url: string): string {
   // Remove trailing slash
   const cleaned = url.endsWith('/') ? url.slice(0, -1) : url
   
-  // Validate URL format
+  // For supabase.co domains, trust they're valid
+  if (cleaned.includes('.supabase.co')) {
+    return cleaned
+  }
+  
+  // Validate URL format for other domains
   try {
     new URL(cleaned)
     return cleaned
   } catch {
-    console.warn('Invalid Supabase URL, using placeholder')
+    // Only warn in development or when not in build process
+    if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+      console.warn('Invalid Supabase URL, using placeholder')
+    }
     return 'https://placeholder.supabase.co'
   }
 }
