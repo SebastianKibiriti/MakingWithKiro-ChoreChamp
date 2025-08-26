@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getRankByPoints, getNextRank } from "../../../lib/ranks";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
 
@@ -51,11 +52,25 @@ export async function POST(request: NextRequest) {
     const characterKey = character.toLowerCase() as keyof typeof CHARACTER_PROMPTS;
     const characterConfig = CHARACTER_PROMPTS[characterKey] || CHARACTER_PROMPTS.superhero;
 
+    // Calculate rank progression info
+    const currentPoints = profile?.points || 0;
+    const currentRank = getRankByPoints(currentPoints);
+    const nextRank = getNextRank(currentPoints);
+    const pointsNeeded = nextRank ? nextRank.points - currentPoints : 0;
+
     // Create context-aware prompt for chore assistance
     const prompt = `
 ${characterConfig.personality}
 
-You are an AI chore coach helping a child named ${profile?.name || 'Champion'}. They are asking: "${message}"
+You are an AI chore coach helping a child named ${profile?.name || 'Champion'}. 
+
+IMPORTANT CONTEXT:
+- Current points: ${currentPoints}
+- Current rank: ${currentRank.name} ${currentRank.icon}
+- Next rank: ${nextRank ? `${nextRank.name} ${nextRank.icon}` : 'Already at highest rank!'}
+- Points needed for promotion: ${pointsNeeded}
+
+They are asking: "${message}"
 
 Your role is to:
 1. Help with chore-related questions (how to clean, organize, do tasks efficiently)
@@ -64,8 +79,9 @@ Your role is to:
 4. Stay in character as a ${character}
 5. Keep responses appropriate for children
 6. Be helpful, positive, and engaging
+7. If they ask about points/promotion, use the EXACT numbers provided above
 
-If they ask about specific chores, give practical tips. If they need motivation, encourage them. If they're stuck, break tasks into smaller steps.
+If they ask about points needed for promotion, say exactly "${pointsNeeded} more points" to reach ${nextRank?.name || 'the highest rank'}.
 
 Keep your response under 100 words and very helpful!
 `;
