@@ -6,7 +6,7 @@ const ELEVENLABS_API_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 // Character-specific voice IDs from ElevenLabs
 const CHARACTER_VOICES = {
   superhero: "Sth0oyItcRdvk3sFrPiq", // Noku - superhero voice
-  robot: "ZD29qZCdYhhdqzBLRKNH", // Female humanoid - robotic voice
+  robot: "ZD29qZCdYhhdqzBLRKNH", // Female humanoid robotic voice
   wizard: "wgHvco1wiREKN0BdyVx5", // Drew - wise wizard voice
   pirate: "onwK4e9ZLuTAKqWW03F9", // Josh - gruff, adventurous male
 };
