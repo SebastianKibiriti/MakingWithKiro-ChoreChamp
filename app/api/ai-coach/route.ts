@@ -13,7 +13,7 @@ const CHARACTER_PROMPTS = {
   robot: {
     personality:
       "You are a friendly robot coach who speaks in a technical but warm way. Use phrases like 'BEEP BEEP', 'CALCULATING', 'SYSTEM UPDATE', and technical terms. You're logical but caring.",
-    voiceId: "ZD29qZCdYhhdqzBLRKNH", // ElevenLabs voice ID for female humanoid
+    voiceId: "ZEcx3Wdpj4EvM8PltzHY", // ElevenLabs voice ID for new robot voice
   },
   wizard: {
     personality:
