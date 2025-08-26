@@ -8,6 +8,8 @@ import Link from 'next/link'
 import LoadingSpinner from '../../../components/LoadingSpinner'
 
 export default function LoginPage() {
+  const [step, setStep] = useState<'role' | 'login'>('role')
+  const [selectedRole, setSelectedRole] = useState<'parent' | 'child' | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -25,6 +27,20 @@ export default function LoginPage() {
       window.location.href = '/auth/redirect'
     }
   }, [session, profile])
+
+  const handleRoleSelection = (role: 'parent' | 'child') => {
+    setSelectedRole(role)
+    setStep('login')
+    setError(null)
+  }
+
+  const handleBackToRoleSelection = () => {
+    setStep('role')
+    setSelectedRole(null)
+    setEmail('')
+    setPassword('')
+    setError(null)
+  }
 
   const testConnection = useCallback(async () => {
     setError(null)
@@ -53,9 +69,9 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      console.log('Attempting to sign in...')
+      console.log('Attempting to sign in as:', selectedRole)
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -67,6 +83,29 @@ export default function LoginPage() {
         return
       }
 
+      // Verify the user's role matches the selected role
+      if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+
+        if (profileError) {
+          console.error('Profile fetch error:', profileError)
+          setError('Failed to verify account. Please try again.')
+          setLoading(false)
+          return
+        }
+
+        if (profileData.role !== selectedRole) {
+          setError(`This account is registered as a ${profileData.role}, but you selected ${selectedRole}. Please choose the correct role or use a different account.`)
+          await supabase.auth.signOut()
+          setLoading(false)
+          return
+        }
+      }
+
       console.log('Login successful - auth context will handle redirect')
       // Don't set loading to false here - let the useEffect handle the redirect
     } catch (error: any) {
@@ -74,7 +113,7 @@ export default function LoginPage() {
       setError(`Login failed: ${error.message || 'Please check your connection and try again.'}`)
       setLoading(false)
     }
-  }, [email, password])
+  }, [email, password, selectedRole])
 
   // Show loading while auth context is initializing or user is authenticated
   if (authLoading || (session && profile)) {
@@ -89,76 +128,128 @@ export default function LoginPage() {
             Welcome to Chore Champion
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account
+            {step === 'role' ? 'Choose your role to continue' : `Sign in as ${selectedRole}`}
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+
+        {step === 'role' ? (
+          // Role Selection Step
+          <div className="mt-8 space-y-6">
+            <div className="space-y-4">
+              <button
+                onClick={() => handleRoleSelection('parent')}
+                className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              >
+                <span className="mr-3">👨‍👩‍👧‍👦</span>
+                I am a Parent
+              </button>
+              
+              <button
+                onClick={() => handleRoleSelection('child')}
+                className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              >
+                <span className="mr-3">🧒</span>
+                I am a Child
+              </button>
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Sign up here
+                </Link>
+              </p>
             </div>
           </div>
+        ) : (
+          // Login Form Step
+          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+            <div className="flex items-center justify-between mb-4">
+              <button
+                type="button"
+                onClick={handleBackToRoleSelection}
+                className="text-sm text-indigo-600 hover:text-indigo-500 flex items-center"
+              >
+                ← Back to role selection
+              </button>
+              <div className="flex items-center">
+                <span className="text-2xl mr-2">{selectedRole === 'parent' ? '👨‍👩‍👧‍👦' : '🧒'}</span>
+                <span className="text-sm font-medium text-gray-700 capitalize">{selectedRole}</span>
+              </div>
+            </div>
 
-          {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
-          )}
+            <div className="rounded-md shadow-sm -space-y-px">
+              <div>
+                <label htmlFor="email" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
 
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={testConnection}
-              className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Test Connection
-            </button>
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
+            {error && (
+              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md">{error}</div>
+            )}
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Sign up here
-              </Link>
-            </p>
-          </div>
-        </form>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={testConnection}
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Test Connection
+              </button>
+              
+              <button
+                type="submit"
+                disabled={loading}
+                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
+                  selectedRole === 'parent' 
+                    ? 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500' 
+                    : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+                }`}
+              >
+                {loading ? 'Signing in...' : `Sign in as ${selectedRole}`}
+              </button>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Sign up here
+                </Link>
+              </p>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   )
