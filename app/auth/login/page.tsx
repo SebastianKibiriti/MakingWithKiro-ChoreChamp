@@ -42,26 +42,7 @@ export default function LoginPage() {
     setError(null)
   }
 
-  const testConnection = useCallback(async () => {
-    setError(null)
-    try {
-      console.log('Testing Supabase connection...')
-      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-      
-      const { data, error } = await supabase.from('profiles').select('count').limit(1)
-      
-      if (error) {
-        setError(`❌ Connection test failed: ${error.message}`)
-        console.error('Connection test error:', error)
-      } else {
-        setError('✅ Connection successful! You can now try logging in.')
-        console.log('Connection test successful:', data)
-      }
-    } catch (err: any) {
-      setError(`❌ Connection test failed: ${err.message}`)
-      console.error('Connection test error:', err)
-    }
-  }, [])
+
 
   const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -218,15 +199,7 @@ export default function LoginPage() {
               <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md">{error}</div>
             )}
 
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={testConnection}
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Test Connection
-              </button>
-              
+            <div>
               <button
                 type="submit"
                 disabled={loading}
