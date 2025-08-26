@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
         use_speaker_boost: true
       },
       robot: {
-        stability: 0.8,
-        similarity_boost: 0.8,
-        style: 0.3,
+        stability: 0.5,
+        similarity_boost: 0.9,
+        style: 0.0,
         use_speaker_boost: true
       },
       wizard: {
