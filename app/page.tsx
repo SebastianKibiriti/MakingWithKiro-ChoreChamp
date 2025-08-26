@@ -5,12 +5,8 @@ import { useRouter } from 'next/navigation'
 export default function HomePage() {
   const router = useRouter()
 
-  const goToParentDashboard = () => {
-    router.push('/parent/dashboard')
-  }
-
-  const goToChildDashboard = () => {
-    router.push('/child/dashboard')
+  const goToLogin = () => {
+    router.push('/auth/login')
   }
 
   return (
@@ -21,28 +17,21 @@ export default function HomePage() {
             Chore Champion
           </h1>
           <p className="text-gray-600 mb-8">
-            Choose your dashboard (Auth disabled for testing)
+            Please log in to access your dashboard
           </p>
         </div>
         
         <div className="space-y-4">
           <button
-            onClick={goToParentDashboard}
-            className="w-full flex justify-center py-4 px-6 border border-transparent text-lg font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            onClick={goToLogin}
+            className="w-full flex justify-center py-4 px-6 border border-transparent text-lg font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
           >
-            🏠 Parent Dashboard
-          </button>
-          
-          <button
-            onClick={goToChildDashboard}
-            className="w-full flex justify-center py-4 px-6 border border-transparent text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-          >
-            🎮 Child Dashboard
+            🔐 Login to Access Your Dashboard
           </button>
         </div>
         
         <div className="text-center text-sm text-gray-500">
-          <p>Click either button to access the respective dashboard</p>
+          <p>New to Chore Champion? <a href="/auth/signup" className="text-indigo-600 hover:text-indigo-500">Sign up here</a></p>
         </div>
       </div>
     </div>
