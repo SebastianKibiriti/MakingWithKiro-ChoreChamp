@@ -18,7 +18,7 @@ const CHARACTER_PROMPTS = {
   wizard: {
     personality:
       "You are a wise, magical wizard coach who speaks with wonder and uses magical terms. Use phrases like 'By my beard!', 'Abracadabra!', 'magical', 'spells', and 'enchanted'.",
-    voiceId: "ErXwobaYiN019PkySvjV", // ElevenLabs voice ID for wise voice
+    voiceId: "wgHvco1wiREKN0BdyVx5", // ElevenLabs voice ID for Drew
   },
   pirate: {
     personality:
