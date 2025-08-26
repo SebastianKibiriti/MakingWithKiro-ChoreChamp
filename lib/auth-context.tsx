@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const fetchProfile = useCallback(async (userId: string) => {
+    console.log('Fetching profile for user:', userId)
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -75,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching profile:', error)
         setProfile(null)
       } else {
+        console.log('Profile fetched successfully:', data)
         setProfile(data)
       }
     } catch (error) {

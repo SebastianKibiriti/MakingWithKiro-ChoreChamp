@@ -20,17 +20,8 @@ export async function GET(request: NextRequest) {
       }
 
       if (data.user) {
-        // Get user profile to determine redirect
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single()
-
-        if (profile) {
-          const dashboardPath = profile.role === 'parent' ? '/parent/dashboard' : '/child/dashboard'
-          return NextResponse.redirect(new URL(dashboardPath, request.url))
-        }
+        // Redirect to the redirect page which will handle role-based routing
+        return NextResponse.redirect(new URL('/auth/redirect', request.url))
       }
     } catch (error) {
       console.error('Auth callback error:', error)

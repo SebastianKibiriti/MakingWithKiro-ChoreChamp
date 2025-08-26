@@ -17,12 +17,14 @@ export default function LoginPage() {
 
   // Handle redirection when auth state changes
   useEffect(() => {
+    console.log('Auth state check:', { session: !!session, profile: !!profile, role: profile?.role })
+    
     if (session && profile) {
       console.log('Auth state changed, redirecting user:', profile.role)
-      const redirectPath = profile.role === 'parent' ? '/parent/dashboard' : '/child/dashboard'
-      router.replace(redirectPath)
+      // Redirect to the redirect page which will handle the final redirect
+      window.location.href = '/auth/redirect'
     }
-  }, [session, profile, router])
+  }, [session, profile])
 
   const testConnection = useCallback(async () => {
     setError(null)
