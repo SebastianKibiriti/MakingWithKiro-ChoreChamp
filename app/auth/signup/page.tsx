@@ -172,7 +172,7 @@ export default function SignUpPage() {
               Account Type
             </label>
             <div className="flex space-x-4">
-              <label className="flex items-center">
+              <label className="flex items-center text-gray-900">
                 <input
                   type="radio"
                   name="role"
@@ -183,7 +183,7 @@ export default function SignUpPage() {
                 />
                 Parent
               </label>
-              <label className="flex items-center">
+              <label className="flex items-center text-gray-900">
                 <input
                   type="radio"
                   name="role"

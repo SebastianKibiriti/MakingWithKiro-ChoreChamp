@@ -377,7 +377,7 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
                 }`}
               >
                 <div className="text-2xl mb-1">{character.icon}</div>
-                <div className="text-xs font-medium">{character.name}</div>
+                <div className="text-xs font-medium text-gray-900">{character.name}</div>
               </button>
             ))}
           </div>
@@ -401,7 +401,7 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center">
                       <span className="text-lg mr-2">{selectedCharacter.icon}</span>
-                      <span className="text-xs font-medium">{selectedCharacter.name}</span>
+                      <span className="text-xs font-medium text-gray-900">{selectedCharacter.name}</span>
                     </div>
                     <button
                       onClick={() => speakText(message.content)}
