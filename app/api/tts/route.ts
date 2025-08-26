@@ -57,10 +57,10 @@ export async function POST(request: NextRequest) {
         use_speaker_boost: true
       },
       robot: {
-        stability: 0.9,
-        similarity_boost: 0.6,
-        style: 0.1,
-        use_speaker_boost: false
+        stability: 0.8,
+        similarity_boost: 0.8,
+        style: 0.3,
+        use_speaker_boost: true
       },
       wizard: {
         stability: 0.8,
