@@ -1,8 +1,8 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '../supabase'
+import { supabase } from './supabase'
 
 interface Profile {
   id: string
@@ -22,6 +22,7 @@ interface AuthContextType {
   profile: Profile | null
   loading: boolean
   signOut: () => Promise<void>
+  signUp: (email: string, password: string, name: string, role: 'parent' | 'child', parentEmail?: string) => Promise<{ success: boolean; error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -82,14 +83,95 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut()
-  }
+  }, [])
+
+  const signUp = useCallback(async (email: string, password: string, name: string, role: 'parent' | 'child', parentEmail?: string) => {
+    try {
+      // Create the user account
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+
+      if (authError) {
+        return { success: false, error: authError.message }
+      }
+
+      if (!authData.user) {
+        return { success: false, error: 'Failed to create user account' }
+      }
+
+      // Handle child account creation
+      if (role === 'child') {
+        if (!parentEmail) {
+          return { success: false, error: 'Parent email is required for child accounts' }
+        }
+
+        // Find parent by email
+        const { data: parentData, error: parentError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', parentEmail)
+          .eq('role', 'parent')
+          .single()
+
+        if (parentError || !parentData) {
+          return { success: false, error: 'Parent account not found. Please check the parent email address.' }
+        }
+
+        // Create child profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            email: authData.user.email!,
+            role: 'child',
+            name,
+            parent_id: parentData.id,
+            points: 0,
+          })
+
+        if (profileError) {
+          return { success: false, error: 'Failed to create user profile. Please try again.' }
+        }
+      } else {
+        // Create parent profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            email: authData.user.email!,
+            role: 'parent',
+            name,
+            points: 0,
+          })
+
+        if (profileError) {
+          return { success: false, error: 'Failed to create user profile. Please try again.' }
+        }
+      }
+
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message || 'Sign up failed. Please try again.' }
+    }
+  }, [])
+
+  const contextValue = useMemo(() => ({
+    user,
+    session,
+    profile,
+    loading,
+    signOut,
+    signUp
+  }), [user, session, profile, loading, signOut, signUp])
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signOut }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   )

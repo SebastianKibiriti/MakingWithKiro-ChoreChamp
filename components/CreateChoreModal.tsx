@@ -64,7 +64,7 @@ export default function CreateChoreModal({ parentId, children, onClose, onSucces
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
               placeholder="e.g., Clean your room"
               required
             />
@@ -77,7 +77,7 @@ export default function CreateChoreModal({ parentId, children, onClose, onSucces
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
               rows={3}
               placeholder="Detailed instructions for the chore"
               required
@@ -92,7 +92,7 @@ export default function CreateChoreModal({ parentId, children, onClose, onSucces
               type="number"
               value={points}
               onChange={(e) => setPoints(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
               min={1}
               max={100}
               required
@@ -106,7 +106,7 @@ export default function CreateChoreModal({ parentId, children, onClose, onSucces
             <select
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
             >
               <option value="">Any child can do this</option>
               {children.map((child) => (

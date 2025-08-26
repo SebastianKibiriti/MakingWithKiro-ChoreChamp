@@ -1,14 +1,115 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../../lib/auth-context'
-import { useDashboardStats, useAvailableMissions } from '../../../lib/hooks/useSupabaseData'
+import { supabase } from '../../../lib/supabase'
+import AIVoiceCoach from '../../components/AIVoiceCoach'
+import ChildMissionHub from '../../../components/ChildMissionHub'
+
+interface DashboardStats {
+  currentPoints: number
+  availableMissions: number
+  completedToday: number
+  pendingApprovals: number
+}
 
 export default function ChildDashboard() {
-  const { profile } = useAuth()
-  const { stats, loading: statsLoading, error: statsError } = useDashboardStats(profile?.id, 'child')
-  const { missions, loading: missionsLoading, error: missionsError } = useAvailableMissions(profile?.id)
+  const { profile, loading: authLoading } = useAuth()
+  const [stats, setStats] = useState<DashboardStats>({
+    currentPoints: 0,
+    availableMissions: 0,
+    completedToday: 0,
+    pendingApprovals: 0
+  })
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'overview' | 'missions'>('overview')
 
-  if (statsLoading || missionsLoading) {
+  useEffect(() => {
+    if (profile?.role === 'child') {
+      fetchDashboardData()
+      
+      // Set up real-time subscriptions
+      const subscription = supabase
+        .channel('child_dashboard')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'chore_completions' }, 
+          () => fetchDashboardData()
+        )
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'chores' },
+          () => fetchDashboardData()
+        )
+        .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'profiles' },
+          (payload) => {
+            if (payload.new.id === profile?.id) {
+              fetchDashboardData()
+            }
+          }
+        )
+        .subscribe()
+
+      return () => {
+        subscription.unsubscribe()
+      }
+    }
+  }, [profile])
+
+  const fetchDashboardData = async () => {
+    try {
+      // Get current points from profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('points')
+        .eq('id', profile?.id)
+        .single()
+
+      if (profileError) throw profileError
+
+      // Get available missions count
+      const { count: availableMissionsCount, error: missionsError } = await supabase
+        .from('chores')
+        .select('*', { count: 'exact', head: true })
+        .eq('parent_id', profile?.parent_id)
+        .or(`assigned_to.is.null,assigned_to.eq.${profile?.id}`)
+
+      if (missionsError) throw missionsError
+
+      // Get today's completed chores count
+      const today = new Date().toISOString().split('T')[0]
+      const { count: completedTodayCount, error: completedError } = await supabase
+        .from('chore_completions')
+        .select('*', { count: 'exact', head: true })
+        .eq('child_id', profile?.id)
+        .eq('status', 'approved')
+        .gte('approved_at', `${today}T00:00:00.000Z`)
+        .lt('approved_at', `${today}T23:59:59.999Z`)
+
+      if (completedError) throw completedError
+
+      // Get pending approvals count
+      const { count: pendingCount, error: pendingError } = await supabase
+        .from('chore_completions')
+        .select('*', { count: 'exact', head: true })
+        .eq('child_id', profile?.id)
+        .eq('status', 'pending')
+
+      if (pendingError) throw pendingError
+
+      setStats({
+        currentPoints: profileData?.points || 0,
+        availableMissions: availableMissionsCount || 0,
+        completedToday: completedTodayCount || 0,
+        pendingApprovals: pendingCount || 0
+      })
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (authLoading || loading) {
     return (
       <div className="space-y-6">
         <div className="text-center">
@@ -28,13 +129,10 @@ export default function ChildDashboard() {
     )
   }
 
-  if (statsError || missionsError) {
+  if (profile?.role !== 'child') {
     return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-indigo-900">🏆 Mission Command Center</h1>
-          <p className="text-red-600">Error loading mission data: {statsError || missionsError}</p>
-        </div>
+      <div className="text-center py-8">
+        <p className="text-red-600">Access denied. Child account required.</p>
       </div>
     )
   }
@@ -50,67 +148,79 @@ export default function ChildDashboard() {
         <h1 className="text-3xl font-bold text-indigo-900">🏆 Mission Command Center</h1>
         <p className="text-indigo-700">Ready for your next mission, Agent {profile?.name}?</p>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-          <h3 className="text-lg font-medium text-indigo-900">Current Rank</h3>
-          <p className="text-2xl font-bold text-indigo-600">🎖️ {profile?.rank || 'Recruit'}</p>
-        </div>
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-          <h3 className="text-lg font-medium text-indigo-900">Available Missions</h3>
-          <p className="text-2xl font-bold text-green-600">{stats.availableMissions}</p>
-        </div>
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-          <h3 className="text-lg font-medium text-indigo-900">Missions Completed Today</h3>
-          <p className="text-2xl font-bold text-yellow-600">{stats.completedToday}</p>
-        </div>
+
+      {/* Navigation Tabs */}
+      <div className="border-b border-indigo-200">
+        <nav className="-mb-px flex space-x-8">
+          {[
+            { id: 'overview', name: 'Overview', count: null },
+            { id: 'missions', name: 'Available Missions', count: stats.availableMissions }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab.id
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-indigo-500 hover:text-indigo-700 hover:border-indigo-300'
+              }`}
+            >
+              {tab.name}
+              {tab.count !== null && (
+                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                  activeTab === tab.id ? 'bg-indigo-100 text-indigo-600' : 'bg-indigo-100 text-indigo-600'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
       </div>
 
-      <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-        <h3 className="text-lg font-medium text-indigo-900 mb-4">Progress to Next Rank</h3>
-        <div className="w-full bg-gray-200 rounded-full h-4">
-          <div 
-            className="bg-indigo-600 h-4 rounded-full transition-all duration-300" 
-            style={{ width: `${progressPercentage}%` }}
-          ></div>
-        </div>
-        <p className="text-sm text-indigo-700 mt-2">
-          {currentPoints} / {nextRankPoints} points to next rank
-        </p>
-      </div>
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
+              <h3 className="text-lg font-medium text-indigo-900">Current Rank</h3>
+              <p className="text-2xl font-bold text-indigo-600">🎖️ {profile?.rank || 'Recruit Rascal'}</p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
+              <h3 className="text-lg font-medium text-indigo-900">Total Points</h3>
+              <p className="text-2xl font-bold text-yellow-600">⭐ {stats.currentPoints}</p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
+              <h3 className="text-lg font-medium text-indigo-900">Completed Today</h3>
+              <p className="text-2xl font-bold text-green-600">{stats.completedToday}</p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
+              <h3 className="text-lg font-medium text-indigo-900">Pending Review</h3>
+              <p className="text-2xl font-bold text-orange-600">{stats.pendingApprovals}</p>
+            </div>
+          </div>
 
-      {/* Available Missions Preview */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-indigo-200">
-        <div className="px-6 py-4 border-b border-indigo-200">
-          <h2 className="text-lg font-medium text-indigo-900">Available Missions</h2>
-        </div>
-        <div className="p-6">
-          {missions.length === 0 ? (
-            <p className="text-indigo-700 text-center py-4">
-              No missions available right now. Check back later, Agent!
+          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
+            <h3 className="text-lg font-medium text-indigo-900 mb-4">Progress to Next Rank</h3>
+            <div className="w-full bg-gray-200 rounded-full h-4">
+              <div 
+                className="bg-indigo-600 h-4 rounded-full transition-all duration-300" 
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <p className="text-sm text-indigo-700 mt-2">
+              {currentPoints} / {nextRankPoints} points to next rank
             </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {missions.slice(0, 4).map((mission) => (
-                <div key={mission.id} className="border border-indigo-200 rounded-lg p-4 hover:bg-indigo-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-indigo-900">{mission.title}</h3>
-                    <span className="text-sm font-bold text-yellow-600">⭐ {mission.points}</span>
-                  </div>
-                  <p className="text-sm text-indigo-700 mt-1">{mission.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
-          {missions.length > 4 && (
-            <div className="text-center mt-4">
-              <p className="text-sm text-indigo-600">
-                +{missions.length - 4} more missions available
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+          </div>
+
+          {/* AI Voice Coach */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-indigo-200 p-6">
+            <AIVoiceCoach profile={profile} />
+          </div>
+        </>
+      )}
+
+      {activeTab === 'missions' && <ChildMissionHub />}
     </div>
   )
 }

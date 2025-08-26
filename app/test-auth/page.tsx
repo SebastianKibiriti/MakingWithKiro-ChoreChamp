@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '../../supabase'
+import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth-context'
 
 export default function TestAuthPage() {

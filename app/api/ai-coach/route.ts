@@ -7,7 +7,7 @@ const CHARACTER_PROMPTS = {
   superhero: {
     personality:
       "You are a superhero coach who speaks with enthusiasm and uses superhero metaphors. You're encouraging, brave, and always positive. Use words like 'hero', 'power', 'strength', and 'mission'.",
-    voiceId: "21m00Tcm4TlvDq8ikWAM", // ElevenLabs voice ID for energetic male voice
+    voiceId: "Sth0oyItcRdvk3sFrPiq", // ElevenLabs voice ID for Noku
   },
   robot: {
     personality:
@@ -27,69 +27,161 @@ const CHARACTER_PROMPTS = {
 };
 
 export async function POST(request: NextRequest) {
-  let character = "superhero"; // Default character
+  let character = "Superhero"; // Default character
 
   try {
     const requestData = await request.json();
-    character = requestData.character || "superhero";
-    const { childName, currentPoints, currentRank, recentActivity } =
-      requestData;
+    console.log('AI Coach API received:', requestData);
+    
+    character = requestData.character || "Superhero";
+    const { message, profile } = requestData;
+    
+    console.log('Processing request:', { character, message, profileName: profile?.name });
+    
+    // Check if Gemini API key exists
+    if (!process.env.GOOGLE_GEMINI_API_KEY) {
+      throw new Error('GOOGLE_GEMINI_API_KEY is not set');
+    }
+    
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+    console.log('Gemini API key exists:', apiKey ? 'Yes' : 'No');
+    console.log('API key starts with AIza:', apiKey?.startsWith('AIza') ? 'Yes' : 'No');
+    console.log('API key length:', apiKey?.length || 0);
 
-    const characterConfig =
-      CHARACTER_PROMPTS[character as keyof typeof CHARACTER_PROMPTS] ||
-      CHARACTER_PROMPTS.superhero;
+    const characterKey = character.toLowerCase() as keyof typeof CHARACTER_PROMPTS;
+    const characterConfig = CHARACTER_PROMPTS[characterKey] || CHARACTER_PROMPTS.superhero;
 
-    // Create context-aware prompt for Gemini
+    // Create context-aware prompt for chore assistance
     const prompt = `
 ${characterConfig.personality}
 
-You are encouraging a child named ${childName} who:
-- Currently has ${currentPoints} points
-- Is at rank: ${currentRank}
-- Recent activity: ${recentActivity || "just completed some chores"}
+You are an AI chore coach helping a child named ${profile?.name || 'Champion'}. They are asking: "${message}"
 
-Generate a short, encouraging message (1-2 sentences) that:
-1. Acknowledges their progress
-2. Motivates them to continue
-3. Stays in character
-4. Is appropriate for children
-5. Mentions their name
+Your role is to:
+1. Help with chore-related questions (how to clean, organize, do tasks efficiently)
+2. Provide step-by-step instructions when needed
+3. Give encouragement and motivation
+4. Stay in character as a ${character}
+5. Keep responses appropriate for children
+6. Be helpful, positive, and engaging
 
-Keep it under 50 words and very positive!
+If they ask about specific chores, give practical tips. If they need motivation, encourage them. If they're stuck, break tasks into smaller steps.
+
+Keep your response under 100 words and very helpful!
 `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const message = response.text();
+    console.log('Calling Gemini with prompt:', prompt);
+    
+    try {
+      // Test if genAI is properly initialized
+      if (!genAI) {
+        throw new Error('GoogleGenerativeAI not initialized');
+      }
+      
+      console.log('Creating Gemini model...');
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      console.log('Generating content...');
+      const result = await model.generateContent(prompt);
+      
+      console.log('Getting response...');
+      const response = result.response;
+      const responseText = response.text();
+      
+      console.log('Gemini response received:', responseText);
+      
+      if (!responseText || responseText.trim().length === 0) {
+        throw new Error('Empty response from Gemini');
+      }
+      
+      return NextResponse.json({
+        response: responseText.trim(),
+        character,
+        voiceId: characterConfig.voiceId,
+        timestamp: new Date().toISOString(),
+        source: 'gemini'
+      });
+      
+    } catch (geminiError) {
+      console.error('Gemini API specific error:', geminiError);
+      
+      // If Gemini fails, fall back to simple responses
+      const simpleResponses: { [key: string]: string } = {
+        'clean plates': 'First, scrape off any leftover food. Then rinse with warm water, apply dish soap, scrub gently with a sponge, and rinse thoroughly!',
+        'clean room': 'Start by picking up toys and clothes, make your bed, dust surfaces, and vacuum the floor. Take it one step at a time!',
+        'do dishes': 'Fill sink with warm soapy water, wash from cleanest to dirtiest items, rinse well, and let them air dry!',
+        'organize closet': 'Take everything out, sort into keep/donate piles, then put back by category - shirts together, pants together!',
+        'vacuum': 'Clear the floor first, start from the farthest corner and work toward the door, use slow overlapping strokes!',
+        'make bed': 'Pull the sheets tight and smooth, fluff your pillow, fold the blanket neatly at the foot, and tuck in the sides!',
+        'clean floor': 'First pick up any toys or items, then sweep or vacuum, and finally mop with a damp cloth if needed!',
+        'fold clothes': 'Lay the item flat, fold sleeves in, fold in half from bottom to top, and stack neatly in your drawer!',
+        'take out trash': 'Tie up the bag, take it to the outdoor bin, put in a new bag, and wash your hands when done!',
+        'feed pet': 'Measure the right amount of food, fill the bowl, check the water dish, and give your pet some love!'
+      };
+      
+      const lowerMessage = message.toLowerCase();
+      let responseText = '';
+      
+      for (const [key, response] of Object.entries(simpleResponses)) {
+        if (lowerMessage.includes(key)) {
+          responseText = response;
+          break;
+        }
+      }
+      
+      if (!responseText) {
+        responseText = `Great question! For any chore, remember: break it into small steps, take your time, and ask for help if needed. You've got this, ${profile?.name || 'Champion'}!`;
+      }
+      
+      // Add character personality
+      const characterPrefixes = {
+        superhero: '🦸‍♂️ Hero! ',
+        robot: '🤖 BEEP BEEP! ',
+        wizard: '🧙‍♂️ By my beard! ',
+        pirate: '🏴‍☠️ Ahoy matey! '
+      };
+      
+      const prefix = characterPrefixes[character.toLowerCase() as keyof typeof characterPrefixes] || '🦸‍♂️ Hero! ';
+      responseText = prefix + responseText;
+      
+      console.log('Using fallback response due to Gemini error:', responseText);
+      
+      return NextResponse.json({
+        response: responseText,
+        character,
+        voiceId: characterConfig.voiceId,
+        timestamp: new Date().toISOString(),
+        fallback: true
+      });
+    }
 
-    return NextResponse.json({
-      message: message.trim(),
-      character,
-      voiceId: characterConfig.voiceId,
-      timestamp: new Date().toISOString(),
-    });
+
   } catch (error) {
     console.error("AI Coach API Error:", error);
+    console.error("Error details:", error instanceof Error ? error.message : 'Unknown error');
+    console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
 
-    // Fallback to predefined messages if AI fails
-    const fallbackMessages = {
-      superhero: `Great job, hero! You're showing real superhero strength!`,
-      robot: `BEEP BEEP! Excellent work detected! Your efficiency levels are impressive!`,
-      wizard: `By my magical beard, you're casting powerful spells of helpfulness!`,
-      pirate: `Ahoy there! Ye be the finest crew member on this household ship!`,
+    // Check if it's a Gemini API error
+    if (error instanceof Error && error.message.includes('API_KEY')) {
+      console.error("Gemini API Key issue detected");
+    }
+
+    // Fallback responses based on common chore questions
+    const fallbackResponses = {
+      superhero: `Hey hero! I'm here to help you conquer any chore challenge! Whether it's cleaning your room, doing dishes, or organizing - every task makes you stronger! What specific chore do you need help with?`,
+      robot: `BEEP BEEP! Chore assistance protocol activated! I can help you optimize your cleaning efficiency and break down any task into manageable steps. What household mission requires my computational assistance?`,
+      wizard: `By my magical beard! I have enchanted knowledge of all household spells - from room cleaning magic to dish-washing wizardry! What mystical chore challenge shall we tackle together?`,
+      pirate: `Ahoy there, matey! This old sea dog knows all about keeping a ship (and house) shipshape! From swabbing decks to organizing treasure, I'll help ye navigate any chore adventure!`,
     };
 
-    const fallbackMessage =
-      fallbackMessages[character as keyof typeof fallbackMessages] ||
-      fallbackMessages.superhero;
+    const fallbackResponse = fallbackResponses[character.toLowerCase() as keyof typeof fallbackResponses] || fallbackResponses.superhero;
 
     return NextResponse.json({
-      message: fallbackMessage,
+      response: fallbackResponse,
       character,
-      voiceId:
-        CHARACTER_PROMPTS[character as keyof typeof CHARACTER_PROMPTS]?.voiceId,
+      voiceId: "Sth0oyItcRdvk3sFrPiq", // Default voice ID for fallback (Noku)
       timestamp: new Date().toISOString(),
-    });
+      error: "AI service temporarily unavailable, using fallback response"
+    }, { status: 200 }); // Return 200 instead of 500 for fallback
   }
 }

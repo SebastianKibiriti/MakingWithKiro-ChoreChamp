@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '../../../supabase'
+import { useState, useEffect, useCallback } from 'react'
+import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../../lib/auth-context'
+import Link from 'next/link'
+import LoadingSpinner from '../../../components/LoadingSpinner'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -11,21 +13,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const { profile, session } = useAuth()
+  const { profile, session, loading: authLoading } = useAuth()
 
   // Handle redirection when auth state changes
   useEffect(() => {
     if (session && profile) {
       console.log('Auth state changed, redirecting user:', profile.role)
-      if (profile.role === 'parent') {
-        router.replace('/parent/dashboard')
-      } else if (profile.role === 'child') {
-        router.replace('/child/dashboard')
-      }
+      const redirectPath = profile.role === 'parent' ? '/parent/dashboard' : '/child/dashboard'
+      router.replace(redirectPath)
     }
   }, [session, profile, router])
 
-  const testConnection = async () => {
+  const testConnection = useCallback(async () => {
     setError(null)
     try {
       console.log('Testing Supabase connection...')
@@ -44,9 +43,9 @@ export default function LoginPage() {
       setError(`❌ Connection test failed: ${err.message}`)
       console.error('Connection test error:', err)
     }
-  }
+  }, [])
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
@@ -54,7 +53,7 @@ export default function LoginPage() {
     try {
       console.log('Attempting to sign in...')
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -62,46 +61,22 @@ export default function LoginPage() {
       if (error) {
         console.error('Authentication error:', error)
         setError(error.message)
+        setLoading(false)
         return
       }
 
-      if (data.user) {
-        console.log('User authenticated successfully:', data.user.id)
-        
-        // Fetch user profile to determine role for redirection
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single()
-
-        if (profileError) {
-          console.error('Profile fetch error:', profileError)
-          setError('Error fetching user profile. Please try again.')
-          return
-        }
-
-        console.log('User profile loaded:', profile)
-        
-        // Direct redirection - don't wait for auth context
-        console.log('Login successful, redirecting immediately...')
-        if (profile.role === 'parent') {
-          console.log('Redirecting to parent dashboard')
-          window.location.href = '/parent/dashboard'
-        } else if (profile.role === 'child') {
-          console.log('Redirecting to child dashboard')
-          window.location.href = '/child/dashboard'
-        } else {
-          console.error('Unknown role:', profile.role)
-          setError('Invalid user role. Please contact support.')
-        }
-      }
+      console.log('Login successful - auth context will handle redirect')
+      // Don't set loading to false here - let the useEffect handle the redirect
     } catch (error: any) {
       console.error('Login error:', error)
       setError(`Login failed: ${error.message || 'Please check your connection and try again.'}`)
-    } finally {
       setLoading(false)
     }
+  }, [email, password])
+
+  // Show loading while auth context is initializing or user is authenticated
+  if (authLoading || (session && profile)) {
+    return <LoadingSpinner message={authLoading ? "Loading..." : "Redirecting to your dashboard..."} />
   }
 
   return (
@@ -171,6 +146,15 @@ export default function LoginPage() {
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Sign up here
+              </Link>
+            </p>
           </div>
         </form>
       </div>

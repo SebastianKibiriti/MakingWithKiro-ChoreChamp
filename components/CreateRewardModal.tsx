@@ -62,7 +62,7 @@ export default function CreateRewardModal({ parentId, onClose, onSuccess }: Crea
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
               placeholder="e.g., Extra screen time"
               required
             />
@@ -75,7 +75,7 @@ export default function CreateRewardModal({ parentId, onClose, onSuccess }: Crea
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
               rows={3}
               placeholder="Details about the reward"
               required
@@ -90,7 +90,7 @@ export default function CreateRewardModal({ parentId, onClose, onSuccess }: Crea
               type="number"
               value={pointsRequired}
               onChange={(e) => setPointsRequired(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
               min={1}
               required
             />
@@ -103,7 +103,7 @@ export default function CreateRewardModal({ parentId, onClose, onSuccess }: Crea
             <select
               value={rankRequired}
               onChange={(e) => setRankRequired(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-army-500 text-gray-900"
             >
               <option value="">No rank requirement</option>
               {ARMY_RANKS.map((rank) => (

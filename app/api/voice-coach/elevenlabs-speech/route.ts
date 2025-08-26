@@ -74,8 +74,27 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Clean text for speech synthesis (remove markdown and special characters)
+    const cleanTextForSpeech = (text: string): string => {
+      return text
+        // Remove markdown formatting
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text**
+        .replace(/\*(.*?)\*/g, '$1')     // Remove italic *text*
+        .replace(/__(.*?)__/g, '$1')     // Remove underline __text__
+        .replace(/_(.*?)_/g, '$1')       // Remove italic _text_
+        .replace(/`(.*?)`/g, '$1')       // Remove code `text`
+        .replace(/#{1,6}\s/g, '')        // Remove headers # ## ###
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links [text](url)
+        // Remove other special characters that might cause speech issues
+        .replace(/[*#_`~]/g, '')         // Remove remaining markdown chars
+        .replace(/\s+/g, ' ')            // Normalize whitespace
+        .trim()
+    }
+    
+    const cleanedText = cleanTextForSpeech(body.text)
+    
     // Validate text length (ElevenLabs has limits)
-    if (body.text.length > 5000) {
+    if (cleanedText.length > 5000) {
       return NextResponse.json(
         { error: 'Text too long. Maximum 5000 characters allowed.' },
         { status: 400 }
@@ -105,7 +124,7 @@ export async function POST(request: NextRequest) {
           'xi-api-key': config.elevenLabsApiKey || '',
         },
         body: JSON.stringify({
-          text: body.text,
+          text: cleanedText,
           model_id: config.elevenLabsModel,
           voice_settings: voiceSettings
         }),
@@ -121,7 +140,7 @@ export async function POST(request: NextRequest) {
         { 
           error: 'Speech synthesis failed',
           fallback: true,
-          text: body.text // Return text for browser TTS fallback
+          text: cleanedText // Return cleaned text for browser TTS fallback
         },
         { status: 500 }
       )
@@ -148,11 +167,18 @@ export async function POST(request: NextRequest) {
     // Return fallback response for client-side TTS
     try {
       const body: ElevenLabsRequestBody = await request.json()
+      const cleanedText = body.text
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/[*#_`~]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+      
       return NextResponse.json(
         { 
           error: 'Speech synthesis service unavailable',
           fallback: true,
-          text: body.text
+          text: cleanedText
         },
         { status: 503 }
       )
