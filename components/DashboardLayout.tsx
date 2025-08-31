@@ -41,7 +41,7 @@ export default function DashboardLayout({
 
   const backgroundClass =
     userRole === "child"
-      ? "min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100"
+      ? "min-h-screen bg-gray-50"
       : "min-h-screen bg-gray-50";
 
   return (
@@ -49,7 +49,7 @@ export default function DashboardLayout({
       <Header 
         user={userProfile} 
         onLogout={mockSignOut}
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        onMenuClick={userRole === 'parent' ? () => setSidebarOpen(!sidebarOpen) : undefined}
       />
       <div className="flex">
         <Navigation 
@@ -58,9 +58,11 @@ export default function DashboardLayout({
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
-        {/* Main content area with responsive margin */}
-        <main className={`flex-1 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0 lg:ml-64'} transition-all duration-300`}>
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Main content area with responsive margin and bottom padding for mobile footer */}
+        <main className={`flex-1 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0 lg:ml-64'} transition-all duration-300 ${
+          userRole === 'child' ? 'pb-24 md:pb-6' : ''
+        } overflow-x-hidden`}>
+          <div className="max-w-7xl mx-auto py-6 px-2 sm:px-6 lg:px-8 min-w-0">
             {children}
           </div>
         </main>

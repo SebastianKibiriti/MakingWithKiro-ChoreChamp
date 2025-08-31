@@ -334,17 +334,17 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+    <div>
       <div className="flex items-center mb-4">
-        <Bot className="w-6 h-6 text-blue-600 mr-2" />
-        <h2 className="text-xl font-semibold">AI Chore Coach</h2>
+        <Bot className="w-6 h-6 text-gray-700 mr-2" />
+        <h2 className="text-xl font-semibold text-gray-800">AI Chore Coach</h2>
       </div>
 
       <div className="space-y-4">
         {/* Voice Character Selection */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">
+        <div className="p-3 sm:p-4 rounded-lg shadow-lg border-2" style={{ backgroundColor: '#FFDD00', borderColor: '#FFD700' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 space-y-2 sm:space-y-0">
+            <label className="block text-xs sm:text-sm font-medium text-gray-800">
               Choose your coach:
             </label>
             <button
@@ -358,33 +358,42 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
                 const message = testMessages[selectedCharacter.id as keyof typeof testMessages]
                 speakText(message)
               }}
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm flex items-center"
+              className="px-2 sm:px-3 py-1 text-white rounded text-xs sm:text-sm flex items-center shadow-md hover:shadow-lg transition-all duration-200 flex-shrink-0"
+              style={{ backgroundColor: '#FF9933' }}
               disabled={isSpeaking || isGeneratingAudio}
             >
               <Volume2 className="w-3 h-3 mr-1" />
-              {isGeneratingAudio ? 'Generating...' : isSpeaking ? 'Speaking...' : 'Test Voice'}
+              <span className="hidden sm:inline">{isGeneratingAudio ? 'Generating...' : isSpeaking ? 'Speaking...' : 'Test Voice'}</span>
+              <span className="sm:hidden">Test</span>
             </button>
           </div>
-          <div className="flex space-x-2">
-            {VOICE_CHARACTERS.map((character) => (
-              <button
-                key={character.id}
-                onClick={() => setSelectedVoice(character.id)}
-                className={`p-3 rounded-lg border-2 transition-colors ${
-                  selectedVoice === character.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="text-2xl mb-1">{character.icon}</div>
-                <div className="text-xs font-medium text-gray-900">{character.name}</div>
-              </button>
-            ))}
+          <div className="grid grid-cols-2 sm:flex sm:space-x-2 gap-2 sm:gap-0">
+            {VOICE_CHARACTERS.map((character, index) => {
+              const colors = ['#FF9933', '#99CC66', '#00BBDD', '#E66666']
+              const isSelected = selectedVoice === character.id
+              return (
+                <button
+                  key={character.id}
+                  onClick={() => setSelectedVoice(character.id)}
+                  className={`p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 ${
+                    isSelected ? 'transform scale-105 shadow-lg' : 'hover:scale-102 shadow-md'
+                  }`}
+                  style={{
+                    backgroundColor: isSelected ? colors[index] : 'white',
+                    borderColor: colors[index],
+                    color: isSelected ? 'white' : '#374151'
+                  }}
+                >
+                  <div className="text-xl sm:text-2xl mb-1">{character.icon}</div>
+                  <div className="text-xs font-medium">{character.name}</div>
+                </button>
+              )
+            })}
           </div>
         </div>
 
         {/* Chat Messages */}
-        <div className="bg-white rounded-lg border h-64 overflow-y-auto p-4 space-y-3">
+        <div className="rounded-lg border-2 h-64 overflow-y-auto p-4 space-y-3" style={{ backgroundColor: 'white', borderColor: '#00BBDD' }}>
           {chatMessages.map((message) => (
             <div
               key={message.id}
@@ -393,9 +402,12 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
               <div
                 className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                   message.type === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'text-white'
+                    : 'text-gray-800'
                 }`}
+                style={{
+                  backgroundColor: message.type === 'user' ? '#00BBDD' : '#F0F8FF'
+                }}
               >
                 {message.type === 'coach' && (
                   <div className="flex items-center justify-between mb-1">
@@ -405,7 +417,8 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
                     </div>
                     <button
                       onClick={() => speakText(message.content)}
-                      className="text-blue-600 hover:text-blue-800 p-1"
+                      className="p-1 rounded hover:shadow-md transition-all duration-200"
+                      style={{ color: '#00BBDD' }}
                       title="Speak this message"
                     >
                       <Volume2 className="w-3 h-3" />
@@ -418,13 +431,13 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
           ))}
           {isProcessing && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">
+              <div className="text-gray-800 px-4 py-2 rounded-lg" style={{ backgroundColor: '#F0F8FF' }}>
                 <div className="flex items-center">
                   <span className="text-lg mr-2">{selectedCharacter.icon}</span>
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#00BBDD' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#00BBDD', animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#00BBDD', animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
@@ -435,42 +448,42 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
 
         {/* Voice Input Status */}
         {isListening && (
-          <div className="bg-red-100 border border-red-300 rounded-lg p-3">
+          <div className="border-2 rounded-lg p-3" style={{ backgroundColor: '#E66666', borderColor: '#E56E6E' }}>
             <div className="flex items-center">
-              <Mic className="w-4 h-4 text-red-600 mr-2 animate-pulse" />
-              <span className="text-red-700 font-medium">Listening...</span>
+              <Mic className="w-4 h-4 text-white mr-2 animate-pulse" />
+              <span className="text-white font-medium">Listening...</span>
             </div>
             {transcript && (
-              <p className="text-red-600 text-sm mt-1">"{transcript}"</p>
+              <p className="text-white text-sm mt-1">"{transcript}"</p>
             )}
           </div>
         )}
 
         {/* Audio Generation Status */}
         {isGeneratingAudio && (
-          <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3">
+          <div className="border-2 rounded-lg p-3" style={{ backgroundColor: '#FFDD00', borderColor: '#FFD700' }}>
             <div className="flex items-center">
               <div className="flex space-x-1 mr-2">
-                <div className="w-2 h-2 bg-yellow-600 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-yellow-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-yellow-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-gray-800 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-800 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-gray-800 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
               </div>
-              <span className="text-yellow-700 font-medium">Generating {selectedCharacter.name} voice...</span>
+              <span className="text-gray-800 font-medium">Generating {selectedCharacter.name} voice...</span>
             </div>
           </div>
         )}
 
         {/* Speaking Status */}
         {isSpeaking && !isGeneratingAudio && (
-          <div className="bg-blue-100 border border-blue-300 rounded-lg p-3">
+          <div className="border-2 rounded-lg p-3" style={{ backgroundColor: '#99CC66', borderColor: '#9ACD32' }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Volume2 className="w-4 h-4 text-blue-600 mr-2 animate-pulse" />
-                <span className="text-blue-700 font-medium">{selectedCharacter.name} is speaking...</span>
+                <Volume2 className="w-4 h-4 text-white mr-2 animate-pulse" />
+                <span className="text-white font-medium">{selectedCharacter.name} is speaking...</span>
               </div>
               <button
                 onClick={stopSpeaking}
-                className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+                className="px-2 py-1 bg-white text-gray-800 hover:bg-gray-100 rounded text-sm shadow-md hover:shadow-lg transition-all duration-200"
               >
                 Stop
               </button>
@@ -479,24 +492,23 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
         )}
 
         {/* Input Area */}
-        <form onSubmit={handleSubmit} className="flex space-x-2">
-          <div className="flex-1 flex space-x-2">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <div className="flex space-x-2 flex-1">
             <input
               type="text"
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Ask me about chores or type your message..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              placeholder="Ask me about chores..."
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-sm min-w-0"
               disabled={isProcessing}
             />
             <button
               type="button"
               onClick={isListening ? stopListening : startListening}
-              className={`px-3 py-2 rounded-lg transition-colors ${
-                isListening
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-gray-600 hover:bg-gray-700 text-white'
-              }`}
+              className="px-3 py-2 rounded-lg transition-all duration-200 text-white shadow-md hover:shadow-lg flex-shrink-0"
+              style={{
+                backgroundColor: isListening ? '#E66666' : '#00BBDD'
+              }}
               disabled={isProcessing}
             >
               {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -505,13 +517,16 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
           <button
             type="submit"
             disabled={!textInput.trim() || isProcessing}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+            className="px-4 py-2 disabled:bg-gray-300 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex-shrink-0"
+            style={{
+              backgroundColor: !textInput.trim() || isProcessing ? '#9CA3AF' : '#99CC66'
+            }}
           >
             <Send className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-xs text-gray-500 text-center">
+        <div className="text-xs text-center p-2 rounded-lg" style={{ backgroundColor: '#F0F8FF', color: '#374151' }}>
           💡 Try asking: "How do I clean my room?" or "Tips for doing dishes faster?"
         </div>
       </div>

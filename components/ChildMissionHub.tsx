@@ -137,18 +137,22 @@ export default function ChildMissionHub() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">⏳ Pending Review</span>
+        return <span className="text-white text-xs px-3 py-1 rounded-full font-medium" style={{ backgroundColor: '#00BBDD' }}>⏳ Pending Review</span>
       case 'approved':
-        return <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">✅ Approved</span>
+        return <span className="text-white text-xs px-3 py-1 rounded-full font-medium" style={{ backgroundColor: '#99CC66' }}>✅ Approved</span>
       case 'rejected':
-        return <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">❌ Needs Redo</span>
+        return <span className="text-white text-xs px-3 py-1 rounded-full font-medium" style={{ backgroundColor: '#E66666' }}>❌ Needs Redo</span>
       default:
         return null
     }
   }
 
   if (loading) {
-    return <div className="animate-pulse">Loading your missions, Agent...</div>
+    return (
+      <div className="p-6 rounded-lg shadow-lg border-2 text-center animate-pulse" style={{ backgroundColor: '#FFDD00', borderColor: '#FFD700' }}>
+        <p className="text-gray-800 font-medium">Loading your missions, Agent...</p>
+      </div>
+    )
   }
 
   const availableMissions = missions.filter(mission => {
@@ -157,35 +161,44 @@ export default function ChildMissionHub() {
   })
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-indigo-900">🎯 Available Missions</h2>
-        <p className="text-indigo-700">Choose your next mission, Agent {profile?.name}!</p>
+    <div className="space-y-6 overflow-x-hidden">
+      <div className="text-center p-4 sm:p-6 rounded-lg shadow-lg border-2 mx-2 sm:mx-0" style={{ backgroundColor: '#FF9933', borderColor: '#FF8C00' }}>
+        <h2 className="text-xl sm:text-2xl font-bold text-white">🎯 Available Missions</h2>
+        <p className="text-sm sm:text-base text-white">Choose your next mission, Agent {profile?.name}!</p>
       </div>
 
       {availableMissions.length === 0 ? (
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-indigo-200 p-8 text-center">
-          <p className="text-indigo-700">No missions available right now. Great job completing everything!</p>
+        <div className="rounded-lg shadow-lg border-2 p-6 sm:p-8 text-center mx-2 sm:mx-0" style={{ backgroundColor: '#99CC66', borderColor: '#9ACD32' }}>
+          <p className="text-white font-medium text-sm sm:text-base">No missions available right now. Great job completing everything!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {availableMissions.map((mission) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 px-2 sm:px-0">
+          {availableMissions.map((mission, index) => {
             const status = getCompletionStatus(mission.id)
             const isSubmitting = submitting === mission.id
             
+            // Cycle through colors for mission cards
+            const colors = [
+              { bg: '#FFDD00', border: '#FFD700', text: 'text-gray-800' },
+              { bg: '#00BBDD', border: '#00BCD4', text: 'text-white' },
+              { bg: '#99CC66', border: '#9ACD32', text: 'text-white' },
+              { bg: '#E66666', border: '#E56E6E', text: 'text-white' }
+            ]
+            const cardColor = colors[index % colors.length]
+            
             return (
-              <div key={mission.id} className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-indigo-200 p-6">
+              <div key={mission.id} className="rounded-lg shadow-lg border-2 p-4 sm:p-6" style={{ backgroundColor: cardColor.bg, borderColor: cardColor.border }}>
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-bold text-indigo-900">{mission.title}</h3>
-                  <span className="text-lg font-bold text-yellow-600">⭐ {mission.points}</span>
+                  <h3 className={`font-bold text-sm sm:text-base ${cardColor.text}`}>{mission.title}</h3>
+                  <span className={`text-sm sm:text-lg font-bold ${cardColor.text} flex-shrink-0 ml-2`}>⭐ {mission.points}</span>
                 </div>
                 
-                <p className="text-indigo-700 text-sm mb-4">{mission.description}</p>
+                <p className={`${cardColor.text} text-xs sm:text-sm mb-4 opacity-90`}>{mission.description}</p>
                 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                  <div className="flex items-center space-x-2 flex-wrap">
                     {mission.recurring && (
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">🔄 Recurring</span>
+                      <span className="text-white text-xs px-2 sm:px-3 py-1 rounded-full font-medium" style={{ backgroundColor: '#FF9933' }}>🔄 Recurring</span>
                     )}
                     {getStatusBadge(status || 'available')}
                   </div>
@@ -193,10 +206,10 @@ export default function ChildMissionHub() {
                   <button
                     onClick={() => submitMissionCompletion(mission.id)}
                     disabled={isSubmitting || status === 'pending'}
-                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex-shrink-0 ${
                       status === 'pending'
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-white text-gray-800 hover:bg-gray-100 shadow-md hover:shadow-lg'
                     }`}
                   >
                     {isSubmitting ? '⏳ Submitting...' : 
@@ -212,27 +225,27 @@ export default function ChildMissionHub() {
       )}
 
       {/* Recent Mission History */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-indigo-200">
-        <div className="px-6 py-4 border-b border-indigo-200">
-          <h3 className="text-lg font-medium text-indigo-900">Recent Mission History</h3>
+      <div className="rounded-lg shadow-lg border-2 mx-2 sm:mx-0" style={{ backgroundColor: '#F0F8FF', borderColor: '#00BBDD' }}>
+        <div className="px-4 sm:px-6 py-4 rounded-t-lg" style={{ backgroundColor: '#00BBDD' }}>
+          <h3 className="text-base sm:text-lg font-medium text-white">Recent Mission History</h3>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {completions.length === 0 ? (
-            <p className="text-indigo-700 text-center py-4">
+            <p className="text-gray-700 text-center py-4 text-sm sm:text-base">
               No missions completed yet. Start your first mission above!
             </p>
           ) : (
             <div className="space-y-3">
               {completions.slice(0, 5).map((completion) => (
-                <div key={completion.id} className="flex justify-between items-center py-2 border-b border-indigo-100 last:border-b-0">
-                  <div>
-                    <span className="font-medium text-indigo-900">{completion.chore.title}</span>
-                    <span className="text-sm text-indigo-600 ml-2">
+                <div key={completion.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 px-3 sm:px-4 rounded-lg space-y-2 sm:space-y-0" style={{ backgroundColor: 'rgba(255, 221, 0, 0.1)' }}>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-medium text-gray-800 text-sm sm:text-base block sm:inline">{completion.chore.title}</span>
+                    <span className="text-xs sm:text-sm text-gray-600 block sm:inline sm:ml-2">
                       ({new Date(completion.completed_at).toLocaleDateString()})
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-yellow-600">⭐ {completion.chore.points}</span>
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    <span className="font-bold text-gray-800 text-sm sm:text-base">⭐ {completion.chore.points}</span>
                     {getStatusBadge(completion.status)}
                   </div>
                 </div>

@@ -40,9 +40,39 @@ const childNavItems = [
   { name: 'Rewards', href: '/child/rewards', icon: StarIcon },
 ]
 
-function NavigationContent({ role, onLinkClick }: { role: 'parent' | 'child', onLinkClick?: () => void }) {
+function NavigationContent({ role, onLinkClick, isMobileFooter = false }: { role: 'parent' | 'child', onLinkClick?: () => void, isMobileFooter?: boolean }) {
   const pathname = usePathname()
   const navItems = role === 'parent' ? parentNavItems : childNavItems
+
+  if (isMobileFooter && role === 'child') {
+    // Mobile footer layout for child
+    return (
+      <div className="flex justify-around items-center">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href
+          const Icon = item.icon
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onLinkClick}
+              className={`
+                flex flex-col items-center px-1 py-2 text-xs font-medium transition-all duration-200 min-w-0 flex-1
+                ${isActive
+                  ? 'text-white transform scale-110'
+                  : 'text-white/70 hover:text-white hover:scale-105'
+                }
+              `}
+            >
+              <Icon className="h-5 w-5 mb-1 flex-shrink-0" />
+              <span className="text-[9px] leading-tight text-center truncate w-full">{item.name}</span>
+            </Link>
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-1">
@@ -91,57 +121,73 @@ export default function Navigation({ role, isOpen, onClose }: NavigationProps) {
 
   return (
     <>
-      {/* Mobile sidebar */}
-      <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 md:hidden" onClose={onClose}>
-          <Transition.Child
-            as={Fragment}
-            enter="transition-opacity ease-linear duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity ease-linear duration-300"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
+      {/* Mobile floating footer for child role */}
+      {role === 'child' && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe">
+          <div 
+            className="mx-2 mb-2 rounded-2xl shadow-2xl border-2 backdrop-blur-sm"
+            style={{ backgroundColor: '#FF9933', borderColor: '#FF8C00' }}
           >
-            <div className="fixed inset-0 bg-gray-900/80" />
-          </Transition.Child>
+            <nav className="px-2 py-2">
+              <NavigationContent role={role} isMobileFooter={true} />
+            </nav>
+          </div>
+        </div>
+      )}
 
-          <div className="fixed inset-0 flex">
+      {/* Mobile sidebar for parent role */}
+      {role === 'parent' && (
+        <Transition.Root show={isOpen} as={Fragment}>
+          <Dialog as="div" className="relative z-50 md:hidden" onClose={onClose}>
             <Transition.Child
               as={Fragment}
-              enter="transition ease-in-out duration-300 transform"
-              enterFrom="-translate-x-full"
-              enterTo="translate-x-0"
-              leave="transition ease-in-out duration-300 transform"
-              leaveFrom="translate-x-0"
-              leaveTo="-translate-x-full"
+              enter="transition-opacity ease-linear duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition-opacity ease-linear duration-300"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
             >
-              <Dialog.Panel className={`relative mr-16 flex w-full max-w-xs flex-1 ${navBgClass}`}>
-                <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                  <button type="button" className="-m-2.5 p-2.5" onClick={onClose}>
-                    <span className="sr-only">Close sidebar</span>
-                    <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
-                  </button>
-                </div>
-
-                <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4">
-                  <div className="flex h-16 shrink-0 items-center">
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      {role === 'child' ? 'Mission Control' : 'Command Center'}
-                    </h2>
-                  </div>
-                  <nav className="flex flex-1 flex-col">
-                    <NavigationContent role={role} onLinkClick={onClose} />
-                  </nav>
-                </div>
-              </Dialog.Panel>
+              <div className="fixed inset-0 bg-gray-900/80" />
             </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition.Root>
+
+            <div className="fixed inset-0 flex">
+              <Transition.Child
+                as={Fragment}
+                enter="transition ease-in-out duration-300 transform"
+                enterFrom="-translate-x-full"
+                enterTo="translate-x-0"
+                leave="transition ease-in-out duration-300 transform"
+                leaveFrom="translate-x-0"
+                leaveTo="-translate-x-full"
+              >
+                <Dialog.Panel className={`relative mr-16 flex w-full max-w-xs flex-1 ${navBgClass}`}>
+                  <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
+                    <button type="button" className="-m-2.5 p-2.5" onClick={onClose}>
+                      <span className="sr-only">Close sidebar</span>
+                      <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4">
+                    <div className="flex h-16 shrink-0 items-center">
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {role === 'child' ? 'Mission Control' : 'Command Center'}
+                      </h2>
+                    </div>
+                    <nav className="flex flex-1 flex-col">
+                      <NavigationContent role={role} onLinkClick={onClose} />
+                    </nav>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </Dialog>
+        </Transition.Root>
+      )}
 
       {/* Desktop sidebar */}
-      <div className={`hidden md:fixed md:inset-y-0 md:z-50 md:flex md:w-64 md:flex-col ${isOpen ? 'md:block' : 'md:hidden lg:block'}`}>
+      <div className={`hidden md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col ${isOpen ? 'md:block' : 'md:hidden lg:block'}`}>
         <div className={`flex grow flex-col gap-y-5 overflow-y-auto ${navBgClass} px-6 pb-4 shadow-sm`}>
           <div className="flex h-16 shrink-0 items-center">
             <h2 className="text-lg font-semibold text-gray-900">

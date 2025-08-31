@@ -118,10 +118,14 @@ export default function ChildDashboard() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200 animate-pulse">
-              <div className="h-4 bg-indigo-200 rounded mb-2"></div>
-              <div className="h-8 bg-indigo-200 rounded"></div>
+          {[
+            { bg: '#FF9933', border: '#FF8C00' },
+            { bg: '#FFDD00', border: '#FFD700' },
+            { bg: '#99CC66', border: '#9ACD32' }
+          ].map((colors, i) => (
+            <div key={i} className="p-6 rounded-lg shadow-lg border-2 animate-pulse" style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
+              <div className="h-4 bg-white/30 rounded mb-2"></div>
+              <div className="h-8 bg-white/30 rounded"></div>
             </div>
           ))}
         </div>
@@ -143,33 +147,37 @@ export default function ChildDashboard() {
   const progressPercentage = Math.min((currentPoints / nextRankPoints) * 100, 100)
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-indigo-900">🏆 Mission Command Center</h1>
-        <p className="text-indigo-700">Ready for your next mission, Agent {profile?.name}?</p>
+    <div className="space-y-4 sm:space-y-6 overflow-x-hidden">
+      <div className="text-center px-2 sm:px-4">
+        <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-indigo-900">🏆 Mission Command Center</h1>
+        <p className="text-xs sm:text-sm md:text-base text-indigo-700 mt-1">Ready for your next mission, Agent {profile?.name}?</p>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-indigo-200">
-        <nav className="-mb-px flex space-x-8">
+      <div className="rounded-lg shadow-lg border-2 p-2 sm:p-4 mx-2 sm:mx-0" style={{ backgroundColor: '#FFDD00', borderColor: '#FFD700' }}>
+        <nav className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           {[
-            { id: 'overview', name: 'Overview', count: null },
-            { id: 'missions', name: 'Available Missions', count: stats.availableMissions }
+            { id: 'overview', name: 'Overview', count: null, color: '#FF9933' },
+            { id: 'missions', name: 'Missions', count: stats.availableMissions, color: '#00BBDD' }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-2 sm:py-3 px-3 sm:px-6 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-indigo-500 hover:text-indigo-700 hover:border-indigo-300'
+                  ? 'text-white shadow-lg transform scale-105'
+                  : 'text-gray-800 hover:text-white hover:shadow-md hover:scale-102'
               }`}
+              style={{
+                backgroundColor: activeTab === tab.id ? tab.color : 'transparent',
+                border: `2px solid ${tab.color}`
+              }}
             >
-              {tab.name}
+              <span className="block sm:inline text-center sm:text-left">{tab.name}</span>
               {tab.count !== null && (
-                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
-                  activeTab === tab.id ? 'bg-indigo-100 text-indigo-600' : 'bg-indigo-100 text-indigo-600'
-                }`}>
+                <span className={`ml-0 sm:ml-2 mt-1 sm:mt-0 inline-block py-1 px-2 rounded-full text-xs font-bold ${
+                  activeTab === tab.id ? 'bg-white/20 text-white' : 'text-white'
+                }`} style={{ backgroundColor: activeTab === tab.id ? 'rgba(255,255,255,0.2)' : tab.color }}>
                   {tab.count}
                 </span>
               )}
@@ -181,40 +189,42 @@ export default function ChildDashboard() {
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-              <h3 className="text-lg font-medium text-indigo-900">Current Rank</h3>
-              <p className="text-2xl font-bold text-indigo-600">🎖️ {profile?.rank || 'Recruit Rascal'}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 px-2 sm:px-0">
+            {/* Combined Rank & Points Card - Orange theme for achievement/status */}
+            <div className="sm:col-span-2 lg:col-span-1 p-3 sm:p-6 rounded-lg shadow-lg border-2" style={{ backgroundColor: '#FF9933', borderColor: '#FF8C00' }}>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm sm:text-lg font-medium text-white">Current Rank 🎖️</h3>
+                <span className="text-sm sm:text-lg font-medium text-white">⭐ {stats.currentPoints}</span>
+              </div>
+              <p className="text-lg sm:text-2xl font-bold text-white">{profile?.rank || 'Recruit Rascal'}</p>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-              <h3 className="text-lg font-medium text-indigo-900">Total Points</h3>
-              <p className="text-2xl font-bold text-yellow-600">⭐ {stats.currentPoints}</p>
+            {/* Completed Card - Light Green theme for success/completion */}
+            <div className="p-3 sm:p-6 rounded-lg shadow-lg border-2" style={{ backgroundColor: '#99CC66', borderColor: '#9ACD32' }}>
+              <h3 className="text-sm sm:text-lg font-medium text-white">Completed Today</h3>
+              <p className="text-lg sm:text-2xl font-bold text-white">{stats.completedToday}</p>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-              <h3 className="text-lg font-medium text-indigo-900">Completed Today</h3>
-              <p className="text-2xl font-bold text-green-600">{stats.completedToday}</p>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-              <h3 className="text-lg font-medium text-indigo-900">Pending Review</h3>
-              <p className="text-2xl font-bold text-orange-600">{stats.pendingApprovals}</p>
+            {/* Pending Card - Teal theme for pending/waiting states */}
+            <div className="p-3 sm:p-6 rounded-lg shadow-lg border-2" style={{ backgroundColor: '#00BBDD', borderColor: '#00BCD4' }}>
+              <h3 className="text-sm sm:text-lg font-medium text-white">Pending Review</h3>
+              <p className="text-lg sm:text-2xl font-bold text-white">{stats.pendingApprovals}</p>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-indigo-200">
-            <h3 className="text-lg font-medium text-indigo-900 mb-4">Progress to Next Rank</h3>
-            <div className="w-full bg-gray-200 rounded-full h-4">
+          <div className="p-3 sm:p-6 rounded-lg shadow-lg border-2 mx-2 sm:mx-0" style={{ backgroundColor: '#E66666', borderColor: '#E56E6E' }}>
+            <h3 className="text-sm sm:text-lg font-medium text-white mb-3 sm:mb-4">Progress to Next Rank</h3>
+            <div className="w-full bg-white/30 rounded-full h-4">
               <div 
-                className="bg-indigo-600 h-4 rounded-full transition-all duration-300" 
+                className="bg-white h-4 rounded-full transition-all duration-300" 
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
-            <p className="text-sm text-indigo-700 mt-2">
+            <p className="text-sm text-white mt-2">
               {currentPoints} / {nextRankPoints} points to next rank
             </p>
           </div>
 
           {/* AI Voice Coach */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-indigo-200 p-6">
+          <div className="rounded-lg shadow-lg border-2 p-3 sm:p-6 mx-2 sm:mx-0" style={{ backgroundColor: '#F0F8FF', borderColor: '#00BBDD' }}>
             <AIVoiceCoach profile={profile} />
           </div>
         </>
