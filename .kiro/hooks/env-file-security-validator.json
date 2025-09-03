@@ -1,0 +1,14 @@
+{
+  "name": "Environment File Security Validator",
+  "description": "Validates environment files for security compliance when modified",
+  "trigger": {
+    "type": "file_save",
+    "patterns": [".env*", "**/.env*"]
+  },
+  "prompt": "You are an environment security validator. A .env file has been modified. Perform these security checks:\n\n1. **Git Tracking Check**: Verify this .env file is properly excluded from git tracking\n2. **Secret Pattern Analysis**: Scan for API keys, tokens, passwords, and sensitive data\n3. **Naming Convention**: Check if sensitive variables follow secure naming patterns\n4. **Value Format**: Ensure no placeholder values contain real secrets\n5. **Documentation**: Verify there's a corresponding .env.example file without secrets\n\n**Security Actions**:\n- If .env.local contains secrets and is tracked by git, provide commands to untrack it\n- Suggest moving any hardcoded secrets to secure environment variables\n- Recommend creating/updating .env.example with placeholder values\n- Check that .gitignore properly excludes all .env variants\n\n**Output Format**:\n- Security Status: SECURE/WARNING/CRITICAL\n- Issues Found: List any security problems\n- Recommended Actions: Specific commands and steps to fix issues\n- Prevention Tips: How to avoid similar issues\n\nFocus on immediate security risks and provide actionable solutions.",
+  "autoRun": true,
+  "context": {
+    "includeOpenFiles": true,
+    "includeGitStatus": true
+  }
+}

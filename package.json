@@ -11,7 +11,11 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "security:check-exposed": "node scripts/security-check.js",
+    "security:validate-keys": "node scripts/validate-keys.js",
+    "security:netlify-guide": "node scripts/netlify-guide.js",
+    "security:test-apis": "node scripts/test-apis.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",

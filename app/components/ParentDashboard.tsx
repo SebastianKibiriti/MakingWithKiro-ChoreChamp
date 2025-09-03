@@ -6,7 +6,7 @@ import { Plus, Users, CheckCircle, Clock, Trophy } from 'lucide-react'
 import CreateChoreModal from './CreateChoreModal'
 import CreateChildModal from './CreateChildModal'
 import CreateRewardModal from './CreateRewardModal'
-import { getRankByPoints } from '@/lib/ranks'
+import { getRankByPoints } from '@/ranks'
 
 interface ParentDashboardProps {
   profile: any

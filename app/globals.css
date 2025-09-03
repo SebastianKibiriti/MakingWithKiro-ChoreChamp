@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee:wght@400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -40,4 +42,11 @@ html, body {
 /* Ensure all containers respect viewport width */
 .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl, .max-w-xl {
   max-width: 100%;
+}
+
+/* Bungee font class */
+.bungee-regular {
+  font-family: "Bungee", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }

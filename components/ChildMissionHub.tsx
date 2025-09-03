@@ -163,7 +163,7 @@ export default function ChildMissionHub() {
   return (
     <div className="space-y-6 overflow-x-hidden">
       <div className="text-center p-4 sm:p-6 rounded-lg shadow-lg border-2 mx-2 sm:mx-0" style={{ backgroundColor: '#FF9933', borderColor: '#FF8C00' }}>
-        <h2 className="text-xl sm:text-2xl font-bold text-white">🎯 Available Missions</h2>
+        <h2 className="bungee-regular text-xl sm:text-2xl text-white">🎯 Available Missions</h2>
         <p className="text-sm sm:text-base text-white">Choose your next mission, Agent {profile?.name}!</p>
       </div>
 
@@ -227,7 +227,7 @@ export default function ChildMissionHub() {
       {/* Recent Mission History */}
       <div className="rounded-lg shadow-lg border-2 mx-2 sm:mx-0" style={{ backgroundColor: '#F0F8FF', borderColor: '#00BBDD' }}>
         <div className="px-4 sm:px-6 py-4 rounded-t-lg" style={{ backgroundColor: '#00BBDD' }}>
-          <h3 className="text-base sm:text-lg font-medium text-white">Recent Mission History</h3>
+          <h3 className="bungee-regular text-base sm:text-lg text-white">Recent Mission History</h3>
         </div>
         <div className="p-4 sm:p-6">
           {completions.length === 0 ? (

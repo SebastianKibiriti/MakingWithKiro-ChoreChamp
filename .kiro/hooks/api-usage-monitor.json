@@ -1,0 +1,14 @@
+{
+  "name": "API Usage Security Monitor",
+  "description": "Monitors API usage patterns and detects potential security issues",
+  "trigger": {
+    "type": "manual"
+  },
+  "prompt": "You are an API security monitor for the Chore Champion project. Analyze current API usage and security posture:\n\n**API Services to Monitor**:\n- Supabase (database and auth)\n- Google Gemini AI (AI coaching)\n- ElevenLabs (text-to-speech)\n- AssemblyAI (speech recognition)\n\n**Security Analysis Tasks**:\n1. **Environment Security**: Check if API keys are properly secured\n2. **Usage Patterns**: Look for unusual API call patterns in logs\n3. **Rate Limiting**: Verify rate limiting is properly implemented\n4. **Error Monitoring**: Check for authentication errors or failed requests\n5. **Cost Monitoring**: Identify unexpected usage spikes that might indicate compromise\n\n**Security Checks**:\n- Scan code for hardcoded API keys or credentials\n- Verify API keys have proper restrictions (domain, IP, etc.)\n- Check if old/revoked keys are still referenced anywhere\n- Analyze API error logs for security incidents\n- Review recent API usage for anomalies\n\n**Output Format**:\n- Security Status: SECURE/WARNING/CRITICAL\n- API Key Status: Report on each service's key security\n- Usage Anomalies: Any suspicious patterns detected\n- Security Recommendations: Immediate actions needed\n- Monitoring Setup: Suggestions for ongoing security monitoring\n\nProvide a comprehensive security assessment of all API integrations.",
+  "autoRun": false,
+  "context": {
+    "includeCodebase": true,
+    "includeOpenFiles": true,
+    "includeTerminal": true
+  }
+}

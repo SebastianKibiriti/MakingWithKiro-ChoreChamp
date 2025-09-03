@@ -171,7 +171,7 @@ export default function Navigation({ role, isOpen, onClose }: NavigationProps) {
 
                   <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-4">
                     <div className="flex h-16 shrink-0 items-center">
-                      <h2 className="text-lg font-semibold text-gray-900">
+                      <h2 className="bungee-regular text-lg text-gray-900">
                         {role === 'child' ? 'Mission Control' : 'Command Center'}
                       </h2>
                     </div>
@@ -190,7 +190,7 @@ export default function Navigation({ role, isOpen, onClose }: NavigationProps) {
       <div className={`hidden md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col ${isOpen ? 'md:block' : 'md:hidden lg:block'}`}>
         <div className={`flex grow flex-col gap-y-5 overflow-y-auto ${navBgClass} px-6 pb-4 shadow-sm`}>
           <div className="flex h-16 shrink-0 items-center">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="bungee-regular text-lg text-gray-900">
               {role === 'child' ? 'Mission Control' : 'Command Center'}
             </h2>
           </div>

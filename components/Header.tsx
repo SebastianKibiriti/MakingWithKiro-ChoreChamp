@@ -54,7 +54,7 @@ export default function Header({ user, onLogout, onMenuClick }: HeaderProps) {
                 <Bars3Icon className="h-6 w-6" aria-hidden="true" />
               </button>
             )}
-            <h1 className={`text-lg sm:text-xl font-bold ml-2 md:ml-0 ${
+            <h1 className={`bungee-regular text-lg sm:text-xl ml-2 md:ml-0 ${
               isChild ? 'text-indigo-900' : 'text-gray-900'
             }`}>
               <span className="hidden sm:inline">{titleText}</span>

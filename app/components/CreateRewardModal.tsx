@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { X } from 'lucide-react'
-import { ARMY_RANKS } from '@/lib/ranks'
+import { ARMY_RANKS } from '@/ranks'
 
 interface CreateRewardModalProps {
   parentId: string

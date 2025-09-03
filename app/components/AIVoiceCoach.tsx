@@ -18,7 +18,16 @@ const VOICE_CHARACTERS = [
   { id: 'superhero', name: 'Superhero', icon: '🦸‍♂️' },
   { id: 'robot', name: 'Robot', icon: '🤖' },
   { id: 'wizard', name: 'Wizard', icon: '🧙‍♂️' },
-  { id: 'pirate', name: 'Pirate', icon: '🏴‍☠️' }
+  { id: 'genz', name: 'Gen Z', icon: '💯' }
+]
+
+const CONVERSATION_STARTERS = [
+  "How do I clean my room?",
+  "I'm feeling lazy today...",
+  "What's the fastest way to do dishes?",
+  "Can you help me organize my closet?",
+  "I finished my chores! What now?",
+  "I'm having trouble staying motivated"
 ]
 
 export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
@@ -30,7 +39,7 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
     {
       id: '1',
       type: 'coach',
-      content: `Hi ${profile?.name || 'Champion'}! I'm your AI coach. Ask me anything about chores - how to do them, tips to make them easier, or just chat for motivation!`,
+      content: `Hey there, ${profile?.name || 'Champion'}! I'm your AI coach and I'm excited to chat with you! Whether you need help with chores, want tips to make them easier, or just need some motivation - I'm here for you. What's on your mind today?`,
       timestamp: new Date()
     }
   ])
@@ -188,7 +197,7 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
       superhero: ['Google US English Female', 'Microsoft Zira', 'Samantha'],
       robot: ['Google UK English Male', 'Microsoft David', 'Daniel'],
       wizard: ['Google UK English Male', 'Microsoft George', 'Oliver'],
-      pirate: ['Google UK English Male', 'Microsoft Mark', 'Alex']
+      genz: ['Google US English Female', 'Microsoft Zira', 'Samantha']
     }
 
     const characterKey = selectedCharacter.id as keyof typeof voicePreferences
@@ -222,10 +231,8 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
         utterance.pitch = 0.8
         utterance.volume = 0.9
         break
-      case 'pirate':
-        utterance.rate = 1.0
-        utterance.pitch = 0.85
-        utterance.volume = 0.95
+      case 'genz':
+        // Use default browser TTS settings for Gen Z to match ElevenLabs defaults
         break
     }
 
@@ -268,8 +275,9 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
     setIsProcessing(true)
 
     try {
-      // Call AI coach API
-      console.log('Sending request to AI coach:', { message, character: selectedCharacter.name, profile })
+      // Call AI coach API with conversation history for natural flow
+      const recentHistory = chatMessages.slice(-6) // Send last 6 messages for context
+      console.log('Sending request to AI coach:', { message, character: selectedCharacter.name, profile, conversationHistory: recentHistory })
       
       const response = await fetch('/api/ai-coach', {
         method: 'POST',
@@ -279,7 +287,8 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
         body: JSON.stringify({
           message,
           character: selectedCharacter.name,
-          profile: profile
+          profile: profile,
+          conversationHistory: recentHistory
         }),
       })
 
@@ -315,7 +324,7 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
       const fallbackMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'coach',
-        content: "I'm having trouble connecting right now, but I'm here to help! Try asking me about specific chores like 'How do I clean my room?' or 'Tips for doing dishes faster?'",
+        content: "Oops! I'm having a little trouble connecting right now, but don't worry - I'm still here to help you! What chore are you working on? I'd love to chat about it and help you tackle it step by step!",
         timestamp: new Date()
       }
 
@@ -337,7 +346,7 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
     <div>
       <div className="flex items-center mb-4">
         <Bot className="w-6 h-6 text-gray-700 mr-2" />
-        <h2 className="text-xl font-semibold text-gray-800">AI Chore Coach</h2>
+        <h2 className="bungee-regular text-xl text-gray-800">AI Chore Coach</h2>
       </div>
 
       <div className="space-y-4">
@@ -353,7 +362,7 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
                   superhero: "Hey there, hero! I'm your superhero coach, ready to help you conquer any chore challenge with amazing power!",
                   robot: "BEEP BEEP! Greetings, human. I am your robotic assistant, programmed to optimize your household efficiency protocols.",
                   wizard: "Greetings, young apprentice! I am your wise wizard coach, here to share magical secrets of household enchantments.",
-                  pirate: "Ahoy there, matey! I'm your pirate coach, ready to help ye navigate the treacherous waters of household chores!"
+                  genz: "Yo! No cap, I'm your Gen Z coach and I'm here to help you absolutely slay these chores! It's giving main character energy, fr fr!"
                 }
                 const message = testMessages[selectedCharacter.id as keyof typeof testMessages]
                 speakText(message)
@@ -491,6 +500,34 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
           </div>
         )}
 
+        {/* Conversation Starters */}
+        {chatMessages.length <= 1 && (
+          <div className="p-3 sm:p-4 rounded-lg shadow-lg border-2" style={{ backgroundColor: '#F0F8FF', borderColor: '#00BBDD' }}>
+            <h4 className="text-sm font-medium text-gray-800 mb-2">💡 Try asking me:</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {CONVERSATION_STARTERS.map((starter, index) => (
+                <button
+                  key={index}
+                  onClick={() => setTextInput(starter)}
+                  className="text-left p-2 text-xs sm:text-sm text-gray-700 hover:text-white rounded-md transition-all duration-200 hover:shadow-md"
+                  style={{ 
+                    backgroundColor: 'rgba(255, 221, 0, 0.1)',
+                    border: '1px solid rgba(255, 221, 0, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FFDD00'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 221, 0, 0.1)'
+                  }}
+                >
+                  "{starter}"
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <div className="flex space-x-2 flex-1">
@@ -527,7 +564,10 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
         </form>
 
         <div className="text-xs text-center p-2 rounded-lg" style={{ backgroundColor: '#F0F8FF', color: '#374151' }}>
-          💡 Try asking: "How do I clean my room?" or "Tips for doing dishes faster?"
+          💡 {chatMessages.length <= 2 
+            ? `I love chatting about chores, motivation, and helping you succeed! What would you like to talk about?`
+            : `Keep the conversation going! Ask me follow-up questions or tell me how things are going.`
+          }
         </div>
       </div>
     </div>

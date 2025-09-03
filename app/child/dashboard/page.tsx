@@ -149,7 +149,7 @@ export default function ChildDashboard() {
   return (
     <div className="space-y-4 sm:space-y-6 overflow-x-hidden">
       <div className="text-center px-2 sm:px-4">
-        <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-indigo-900">🏆 Mission Command Center</h1>
+        <h1 className="bungee-regular text-lg sm:text-2xl md:text-3xl text-indigo-900">🏆 Mission Command Center</h1>
         <p className="text-xs sm:text-sm md:text-base text-indigo-700 mt-1">Ready for your next mission, Agent {profile?.name}?</p>
       </div>
 
@@ -196,7 +196,7 @@ export default function ChildDashboard() {
                 <h3 className="text-sm sm:text-lg font-medium text-white">Current Rank 🎖️</h3>
                 <span className="text-sm sm:text-lg font-medium text-white">⭐ {stats.currentPoints}</span>
               </div>
-              <p className="text-lg sm:text-2xl font-bold text-white">{profile?.rank || 'Recruit Rascal'}</p>
+              <p className="bungee-regular text-lg sm:text-2xl text-white">{profile?.rank || 'Recruit Rascal'}</p>
             </div>
             {/* Completed Card - Light Green theme for success/completion */}
             <div className="p-3 sm:p-6 rounded-lg shadow-lg border-2" style={{ backgroundColor: '#99CC66', borderColor: '#9ACD32' }}>
@@ -211,7 +211,7 @@ export default function ChildDashboard() {
           </div>
 
           <div className="p-3 sm:p-6 rounded-lg shadow-lg border-2 mx-2 sm:mx-0" style={{ backgroundColor: '#E66666', borderColor: '#E56E6E' }}>
-            <h3 className="text-sm sm:text-lg font-medium text-white mb-3 sm:mb-4">Progress to Next Rank</h3>
+            <h3 className="bungee-regular text-sm sm:text-lg text-white mb-3 sm:mb-4">Progress to Next Rank</h3>
             <div className="w-full bg-white/30 rounded-full h-4">
               <div 
                 className="bg-white h-4 rounded-full transition-all duration-300" 

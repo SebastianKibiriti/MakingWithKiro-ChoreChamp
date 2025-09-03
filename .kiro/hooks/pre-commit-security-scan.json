@@ -1,0 +1,14 @@
+{
+  "name": "Pre-commit Security Scan",
+  "description": "Scans files for API keys, secrets, and sensitive data before commits",
+  "trigger": {
+    "type": "file_save",
+    "patterns": ["**/*"]
+  },
+  "prompt": "You are a security scanner. Analyze the saved file for potential security issues:\n\n1. Scan for API keys, tokens, passwords, or other secrets\n2. Check for hardcoded credentials or sensitive data\n3. Look for common secret patterns (keys starting with 'sk_', 'pk_', JWT tokens, etc.)\n4. Verify .env files are not being tracked in git\n5. Check for database connection strings or URLs with credentials\n\nIf you find any security issues:\n- List each issue with its location and risk level\n- Suggest how to fix each issue\n- Recommend moving secrets to environment variables\n- Warn about git commit risks\n\nIf no issues found, confirm the file is secure for commit.\n\nFocus on the file that was just saved and any related security implications.",
+  "autoRun": false,
+  "context": {
+    "includeOpenFiles": true,
+    "includeGitDiff": true
+  }
+}

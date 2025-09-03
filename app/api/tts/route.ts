@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+const ELEVENLABS_MODEL = process.env.ELEVENLABS_MODEL || 'eleven_turbo_v2_5';
 const ELEVENLABS_API_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 
 // Character-specific voice IDs from ElevenLabs
 const CHARACTER_VOICES = {
-  superhero: "Sth0oyItcRdvk3sFrPiq", // Noku - superhero voice
-  robot: "ZEcx3Wdpj4EvM8PltzHY", // New robot voice
-  wizard: "wgHvco1wiREKN0BdyVx5", // Drew - wise wizard voice
-  pirate: "onwK4e9ZLuTAKqWW03F9", // Josh - gruff, adventurous male
+  superhero: "Sth0oyItcRdvk3sFrPiq", // ElevenLabs voice ID for superhero
+  robot: "ZD29qZCdYhhdqzBLRKNH", // ElevenLabs voice ID for robot
+  wizard: "V33LkP9pVLdcjeB2y5Na", // ElevenLabs voice ID for wizard
+  genz: "h8LZpYr8y3VBz0q2x0LP", // ElevenLabs voice ID for Gen Z
 };
 
 export async function POST(request: NextRequest) {
   try {
     const { text, character } = await request.json();
+    
+    console.log(`TTS API received request - character: "${character}", text length: ${text?.length || 0}`);
 
     if (!ELEVENLABS_API_KEY) {
       console.log('ElevenLabs API key not found, falling back to browser TTS');
@@ -25,7 +28,9 @@ export async function POST(request: NextRequest) {
 
     const voiceId = CHARACTER_VOICES[character as keyof typeof CHARACTER_VOICES] || CHARACTER_VOICES.superhero;
     
-    console.log(`Generating TTS for ${character} with voice ${voiceId}`);
+    console.log(`Generating TTS for character "${character}" with voice ID "${voiceId}"`);
+    console.log(`Using ElevenLabs model: "${ELEVENLABS_MODEL}"`);
+    console.log(`Available characters:`, Object.keys(CHARACTER_VOICES));
 
     // Clean text for better speech synthesis
     const cleanTextForSpeech = (inputText: string): string => {
@@ -48,35 +53,13 @@ export async function POST(request: NextRequest) {
     
     const cleanText = cleanTextForSpeech(text);
 
-    // Character-specific voice settings
-    const voiceSettings = {
-      superhero: {
-        stability: 0.75,
-        similarity_boost: 0.8,
-        style: 0.2,
-        use_speaker_boost: true
-      },
-      robot: {
-        stability: 0.5,
-        similarity_boost: 0.9,
-        style: 0.0,
-        use_speaker_boost: true
-      },
-      wizard: {
-        stability: 0.8,
-        similarity_boost: 0.9,
-        style: 0.4,
-        use_speaker_boost: true
-      },
-      pirate: {
-        stability: 0.7,
-        similarity_boost: 0.8,
-        style: 0.3,
-        use_speaker_boost: true
-      }
+    // Use default ElevenLabs voice settings for all characters
+    const defaultSettings = {
+      stability: 0.5,
+      similarity_boost: 0.75,
+      style: 0.0,
+      use_speaker_boost: true
     };
-
-    const settings = voiceSettings[character as keyof typeof voiceSettings] || voiceSettings.superhero;
 
     const response = await fetch(`${ELEVENLABS_API_URL}/${voiceId}`, {
       method: 'POST',
@@ -87,16 +70,19 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         text: cleanText,
-        model_id: 'eleven_monolingual_v1',
-        voice_settings: settings
+        model_id: ELEVENLABS_MODEL,
+        voice_settings: defaultSettings
       }),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`ElevenLabs API error: ${response.status} - ${errorText}`);
       throw new Error(`ElevenLabs API error: ${response.status}`);
     }
 
     const audioBuffer = await response.arrayBuffer();
+    console.log(`ElevenLabs TTS successful - generated ${audioBuffer.byteLength} bytes of audio`);
     
     return new NextResponse(audioBuffer, {
       headers: {

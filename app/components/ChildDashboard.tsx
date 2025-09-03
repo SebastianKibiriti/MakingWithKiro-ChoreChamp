@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Trophy, Star, CheckCircle, Clock } from 'lucide-react'
-import { getRankByPoints, getNextRank, ARMY_RANKS } from '@/lib/ranks'
+import { getRankByPoints, getNextRank, ARMY_RANKS } from '@/ranks'
 // import AIVoiceCoach from './AIVoiceCoach' // Temporarily disabled
 
 interface ChildDashboardProps {
