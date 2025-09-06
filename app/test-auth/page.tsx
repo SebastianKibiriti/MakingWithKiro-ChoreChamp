@@ -98,7 +98,7 @@ export default function TestAuthPage() {
           <h2 className="text-lg font-medium text-gray-900 mb-4">Environment Check</h2>
           <div className="space-y-2 text-sm">
             <p><strong>Supabase URL:</strong> {process.env.NEXT_PUBLIC_SUPABASE_URL || 'Not set'}</p>
-            <p><strong>Supabase Key:</strong> {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not set'}</p>
+            <p><strong>Supabase Key:</strong> {process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ? 'Set' : 'Not set'}</p>
           </div>
         </div>
       </div>

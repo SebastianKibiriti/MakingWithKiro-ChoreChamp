@@ -52,8 +52,8 @@ Create `.env.new` with your new keys:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://htvswcufhsptqdsciyvh.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_new_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_new_supabase_service_role_key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_new_supabase_publishable_key
+SUPABASE_SECRET_KEY=your_new_supabase_secret_key
 GOOGLE_GEMINI_API_KEY=your_new_google_gemini_api_key
 ELEVENLABS_API_KEY=your_new_elevenlabs_api_key
 ASSEMBLYAI_API_KEY=your_new_assemblyai_api_key
