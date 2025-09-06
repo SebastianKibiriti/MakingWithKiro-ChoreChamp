@@ -4,9 +4,6 @@ import { getRankByPoints, getNextRank } from "../../../ranks";
 import { checkUsageLimit, incrementUsage } from "../../../lib/usage-tracker";
 import { createClient } from '@supabase/supabase-js';
 import { profile } from "console";
-import { profile } from "console";
-import { profile } from "console";
-import { profile } from "console";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
 
