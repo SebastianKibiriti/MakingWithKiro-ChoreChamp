@@ -4,7 +4,14 @@ import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+  
+  // Create middleware client with explicit environment variables
+  const supabase = createMiddlewareClient({ 
+    req, 
+    res,
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+  })
 
   // Refresh session if expired - required for Server Components
   const {
