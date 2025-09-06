@@ -1,10 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Server-side Supabase client with service role key
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
-);
+// Create server-side Supabase client only when needed
+function getServerSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SECRET_KEY!
+  );
+}
 
 export interface UsageLimit {
   aiRequests: number;
@@ -20,6 +22,7 @@ export const DEFAULT_LIMITS: UsageLimit = {
 
 // Server-side function for API routes
 export async function getUserUsage(userId: string): Promise<{ aiRequests: number; ttsRequests: number }> {
+  const supabase = getServerSupabase();
   const today = new Date().toISOString().split('T')[0];
   
   const { data, error } = await supabase
@@ -61,6 +64,7 @@ export async function getUserUsageClient(supabaseClient: any, userId: string): P
 }
 
 export async function incrementUsage(userId: string, type: 'ai' | 'tts'): Promise<boolean> {
+  const supabase = getServerSupabase();
   const today = new Date().toISOString().split('T')[0];
   
   // Get current usage

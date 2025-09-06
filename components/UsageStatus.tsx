@@ -3,12 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth-context';
 import { getUserUsageClient, DEFAULT_LIMITS } from '../lib/usage-tracker';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-);
+import { supabase } from '../lib/supabase';
 
 export default function UsageStatus() {
   const { user } = useAuth();
