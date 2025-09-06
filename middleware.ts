@@ -5,12 +5,29 @@ import type { NextRequest } from 'next/server'
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   
+  // Get environment variables with fallback support
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  // Debug logging
+  console.log('Middleware env check:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseKey,
+    urlLength: supabaseUrl?.length || 0,
+    keyLength: supabaseKey?.length || 0
+  })
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase environment variables in middleware')
+    return res
+  }
+  
   // Create middleware client with explicit environment variables
   const supabase = createMiddlewareClient({ 
     req, 
     res,
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+    supabaseUrl,
+    supabaseKey
   })
 
   // Refresh session if expired - required for Server Components
