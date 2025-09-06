@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkUsageLimit, incrementUsage } from "../../../lib/usage-tracker";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_MODEL = process.env.ELEVENLABS_MODEL || 'eleven_turbo_v2_5';
@@ -14,7 +15,21 @@ const CHARACTER_VOICES = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, character } = await request.json();
+    const { text, character, userId } = await request.json();
+
+    // Check if user has reached their daily TTS limit
+    if (userId) {
+      const usageCheck = await checkUsageLimit(userId, 'tts');
+      if (!usageCheck.allowed) {
+        return NextResponse.json({
+          error: 'USAGE_LIMIT_EXCEEDED',
+          message: 'Daily voice message limit reached',
+          remaining: usageCheck.remaining,
+          limit: usageCheck.limit,
+          resetTime: 'midnight'
+        }, { status: 429 });
+      }
+    }
     
     console.log(`TTS API received request - character: "${character}", text length: ${text?.length || 0}`);
 
@@ -83,6 +98,11 @@ export async function POST(request: NextRequest) {
 
     const audioBuffer = await response.arrayBuffer();
     console.log(`ElevenLabs TTS successful - generated ${audioBuffer.byteLength} bytes of audio`);
+    
+    // Increment usage count after successful TTS generation
+    if (userId) {
+      await incrementUsage(userId, 'tts');
+    }
     
     return new NextResponse(audioBuffer, {
       headers: {

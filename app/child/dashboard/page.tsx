@@ -5,6 +5,7 @@ import { useAuth } from '../../../lib/auth-context'
 import { supabase } from '../../../lib/supabase'
 import AIVoiceCoach from '../../components/AIVoiceCoach'
 import ChildMissionHub from '../../../components/ChildMissionHub'
+import UsageStatus from '../../../components/UsageStatus'
 
 interface DashboardStats {
   currentPoints: number
@@ -221,6 +222,11 @@ export default function ChildDashboard() {
             <p className="text-sm text-white mt-2">
               {currentPoints} / {nextRankPoints} points to next rank
             </p>
+          </div>
+
+          {/* Usage Status */}
+          <div className="mx-2 sm:mx-0">
+            <UsageStatus />
           </div>
 
           {/* AI Voice Coach */}

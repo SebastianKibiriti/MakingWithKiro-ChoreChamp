@@ -49,11 +49,26 @@ CREATE TABLE IF NOT EXISTS rewards (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create user_usage table for tracking daily API usage
+CREATE TABLE IF NOT EXISTS user_usage (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  ai_requests INTEGER DEFAULT 0,
+  tts_requests INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Ensure one record per user per day
+  UNIQUE(user_id, date)
+);
+
 -- Enable Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chore_completions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rewards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_usage ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 CREATE POLICY "Users can view their own profile" ON profiles
@@ -110,6 +125,16 @@ CREATE POLICY "Children can view their parent's rewards" ON rewards
     parent_id IN (SELECT parent_id FROM profiles WHERE id = auth.uid())
   );
 
+-- User usage policies
+CREATE POLICY "Users can view their own usage" ON user_usage
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own usage" ON user_usage
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own usage" ON user_usage
+  FOR UPDATE USING (auth.uid() = user_id);
+
 -- Function to handle user creation
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
@@ -158,3 +183,19 @@ CREATE TRIGGER update_profiles_updated_at
 CREATE TRIGGER update_chores_updated_at
   BEFORE UPDATE ON chores
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_user_usage_updated_at
+  BEFORE UPDATE ON user_usage
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Create index for better performance on usage queries
+CREATE INDEX IF NOT EXISTS idx_user_usage_user_date ON user_usage(user_id, date);
+
+-- Function to clean up old usage records (keeps last 30 days)
+CREATE OR REPLACE FUNCTION cleanup_old_usage()
+RETURNS void AS $$
+BEGIN
+  DELETE FROM user_usage 
+  WHERE date < CURRENT_DATE - INTERVAL '30 days';
+END;
+$$ LANGUAGE plpgsql;

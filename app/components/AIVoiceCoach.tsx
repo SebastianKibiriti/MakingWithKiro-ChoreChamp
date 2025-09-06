@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Mic, MicOff, Send, Volume2, Bot } from 'lucide-react'
+import UsageLimitModal from '../../components/UsageLimitModal'
+import { useAuth } from '../../lib/auth-context'
 
 interface AIVoiceCoachProps {
   profile: any
@@ -31,10 +33,13 @@ const CONVERSATION_STARTERS = [
 ]
 
 export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
+  const { user } = useAuth()
   const [selectedVoice, setSelectedVoice] = useState('superhero')
   const [isListening, setIsListening] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [textInput, setTextInput] = useState('')
+  const [showUsageLimitModal, setShowUsageLimitModal] = useState(false)
+  const [usageLimitInfo, setUsageLimitInfo] = useState({ type: 'ai' as 'ai' | 'tts', remaining: 0, limit: 0 })
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -132,9 +137,25 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
         },
         body: JSON.stringify({
           text: text,
-          character: selectedCharacter.id
+          character: selectedCharacter.id,
+          userId: user?.id
         }),
       })
+
+      if (response.status === 429) {
+        // Handle usage limit exceeded
+        const errorData = await response.json()
+        if (errorData.error === 'USAGE_LIMIT_EXCEEDED') {
+          setUsageLimitInfo({
+            type: 'tts',
+            remaining: errorData.remaining,
+            limit: errorData.limit
+          })
+          setShowUsageLimitModal(true)
+          setIsGeneratingAudio(false)
+          return
+        }
+      }
 
       if (response.ok && response.headers.get('content-type')?.includes('audio')) {
         console.log('ElevenLabs TTS successful')
@@ -288,11 +309,27 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
           message,
           character: selectedCharacter.name,
           profile: profile,
-          conversationHistory: recentHistory
+          conversationHistory: recentHistory,
+          userId: user?.id
         }),
       })
 
       console.log('Response status:', response.status)
+      
+      if (response.status === 429) {
+        // Handle usage limit exceeded
+        const errorData = await response.json()
+        if (errorData.error === 'USAGE_LIMIT_EXCEEDED') {
+          setUsageLimitInfo({
+            type: 'ai',
+            remaining: errorData.remaining,
+            limit: errorData.limit
+          })
+          setShowUsageLimitModal(true)
+          setIsProcessing(false)
+          return
+        }
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -570,6 +607,15 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
           }
         </div>
       </div>
+
+      {/* Usage Limit Modal */}
+      <UsageLimitModal
+        isOpen={showUsageLimitModal}
+        onClose={() => setShowUsageLimitModal(false)}
+        limitType={usageLimitInfo.type}
+        remaining={usageLimitInfo.remaining}
+        limit={usageLimitInfo.limit}
+      />
     </div>
   )
 }

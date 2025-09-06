@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getRankByPoints, getNextRank } from "../../../ranks";
-import { profile } from "console";
+import { checkUsageLimit, incrementUsage } from "../../../lib/usage-tracker";
+import { createClient } from '@supabase/supabase-js';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY!);
 
@@ -36,7 +37,21 @@ export async function POST(request: NextRequest) {
     console.log("AI Coach API received:", requestData);
 
     character = requestData.character || "Superhero";
-    const { message, profile, conversationHistory } = requestData;
+    const { message, profile, conversationHistory, userId } = requestData;
+
+    // Check if user has reached their daily limit
+    if (userId) {
+      const usageCheck = await checkUsageLimit(userId, 'ai');
+      if (!usageCheck.allowed) {
+        return NextResponse.json({
+          error: 'USAGE_LIMIT_EXCEEDED',
+          message: 'Daily AI coach limit reached',
+          remaining: usageCheck.remaining,
+          limit: usageCheck.limit,
+          resetTime: 'midnight'
+        }, { status: 429 });
+      }
+    }
 
     console.log("Processing request:", {
       character,
@@ -178,6 +193,11 @@ If they ask about points needed for promotion, say exactly "${pointsNeeded} more
         throw new Error("Empty response from Gemini");
       }
 
+      // Increment usage count after successful response
+      if (userId) {
+        await incrementUsage(userId, 'ai');
+      }
+
       return NextResponse.json({
         response: responseText.trim(),
         character,
@@ -243,6 +263,11 @@ If they ask about points needed for promotion, say exactly "${pointsNeeded} more
       responseText = prefix + responseText;
 
       console.log("Using fallback response due to Gemini error:", responseText);
+
+      // Increment usage count even for fallback responses
+      if (userId) {
+        await incrementUsage(userId, 'ai');
+      }
 
       return NextResponse.json({
         response: responseText,
