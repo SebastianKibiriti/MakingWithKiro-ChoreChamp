@@ -253,7 +253,10 @@ export default function AIVoiceCoach({ profile }: AIVoiceCoachProps) {
         utterance.volume = 0.9
         break
       case 'genz':
-        // Use default browser TTS settings for Gen Z to match ElevenLabs defaults
+        // Optimized settings for Gen Z - faster, more energetic speech
+        utterance.rate = 1.1 // Slightly faster than default
+        utterance.pitch = 1.0 // Normal pitch
+        utterance.volume = 0.9 // Clear volume
         break
     }
 

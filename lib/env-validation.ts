@@ -10,6 +10,7 @@ interface VoiceCoachConfig {
   defaultCharacter?: string
   maxSessionMinutes?: number
   dailyLimitMinutes?: number
+  voicePaceGenZ?: number
 }
 
 interface ValidationResult {
@@ -29,10 +30,11 @@ export function validateVoiceCoachEnvironment(): ValidationResult {
     geminiTemperature: parseFloat(process.env.GEMINI_TEMPERATURE || '0.7'),
     geminiMaxTokens: parseInt(process.env.GEMINI_MAX_TOKENS || '150'),
     assemblyAISampleRate: parseInt(process.env.ASSEMBLYAI_SAMPLE_RATE || '16000'),
-    elevenLabsModel: process.env.ELEVENLABS_MODEL || 'eleven_monolingual_v1',
+    elevenLabsModel: process.env.ELEVENLABS_MODEL || 'eleven_turbo_v2_5',
     defaultCharacter: process.env.VOICE_COACH_DEFAULT_CHARACTER || 'friendly-guide',
     maxSessionMinutes: parseInt(process.env.VOICE_COACH_MAX_SESSION_MINUTES || '10'),
-    dailyLimitMinutes: parseInt(process.env.VOICE_COACH_DAILY_LIMIT_MINUTES || '30')
+    dailyLimitMinutes: parseInt(process.env.VOICE_COACH_DAILY_LIMIT_MINUTES || '30'),
+    voicePaceGenZ: parseFloat(process.env.VOICE_PACE_GENZ || '0.75')
   }
 
   if (!config.googleGeminiApiKey) {
